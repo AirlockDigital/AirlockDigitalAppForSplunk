@@ -1,6 +1,4 @@
-# AirlockDigitalAppForSplunk
-Airlock Digital App for Splunk
-
+# Airlock Digital App For Splunk
 Airlock Digital App for Splunk provides a rich application for security operations teams to visualize Microsoft Windows, SysInternals SysMon and Airlock Digital Application Whitelisting data.
 
 This application provides interactive dashboards for:
