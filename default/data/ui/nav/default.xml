@@ -1,0 +1,49 @@
+<nav color="#104284">
+	<view name="Landing" default='true' />
+	<collection label="Airlock Application Whitelisting">
+		<view name="Airlock_Overview" />	
+		<view name="Activity_Viewer" />
+		<view name="Command_Line" />
+		<view name="Rule_Usage" />
+		<view name="Trends" />
+		<view name="search" />
+	</collection>
+	<collection label="Windows Security">
+			<view name="Windows_Overview" />
+			<view name="Endpoint_Interrogator" />
+	<collection label="Accounts">
+			<view name="Account_Usage" />
+			<view name="Privileged_Account_Usage" />
+			<view name="Account_Modifications" />
+			<view name="Interactive_User_Activity" />
+			<view name="Remote_Desktop_Detection" />			
+	</collection>	
+	<collection label="Applications">
+			<view name="App_Crash_Dash" />
+			<view name="EMET" />
+			<view name="Software_Installation" />			
+	</collection>
+	<collection label="Other">
+			<view name="AD_Attacks" />
+			<view name="Group_Policy_Errors" />		
+			<view name="Kernel_Signing" />			
+			<view name="Log_Clearing" />
+			<view name="powershell" />
+			<view name="powershell_fuzzy" />			
+			<view name="Printing" />			
+			<view name="Services" />
+			<view name="Windows_Defender" />
+			<view name="Windows_Firewall" />			
+	</collection>
+	</collection>
+	<collection label="SysMon">
+		<collection label="Process Creation">
+			<view name="Process_Creation_Overview"/>
+			<view name="Process_Creation_Indicators"/>
+		</collection>
+		<view name="Process_Injection"/>
+		<view name="Driver_Loading" />
+		<view name="Mimikatz_Dump_Finder" />
+	</collection>
+	<a href="https://www.airlockdigital.com/" target="_blank">Airlock Website</a>
+</nav>

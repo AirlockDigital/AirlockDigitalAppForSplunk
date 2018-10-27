@@ -1,0 +1,176 @@
+<form>
+  <label>Process Creation Indicators</label>
+  <search id="processindicatorsearch">
+    <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 (ParentImage="*cmd.exe*" OR ParentImage="*command.exe*" OR ParentImage="*powershell.exe*") $computernamefilter$ $imagenamefilter$ $usernamefilter$ $commandlinefilter$ $parentimagefilter$ $parentcommandlinefilter$ $integritylevelfilter$ |rename Image AS "Image Loaded"|sort - UtcTime</query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toprare" searchWhenChanged="true">
+      <label>Top / Rare</label>
+      <choice value="Top">Top</choice>
+      <choice value="Rare">Rare</choice>
+      <default>Rare</default>
+      <initialValue>Rare</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"| dedup index | stats count as numberofevents| rangemap field=numberofevents low=1-50 default=severe | replace 0 with "No SysMon Events in previous 15 minutes, Check SysMon Logger" | replace 1 with "SysMon Events Logging OK"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0xd93f3c","0x65a637"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <option name="height">50</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>CMD and Powershell Loading Images</title>
+      <input type="text" token="computernamefilter" searchWhenChanged="true">
+        <label>Computer Name Filter</label>
+        <default>*</default>
+        <prefix>Computer="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="usernamefilter" searchWhenChanged="true">
+        <label>User Name Filter</label>
+        <default>*</default>
+        <prefix>User="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="imagenamefilter" searchWhenChanged="true">
+        <label>Image Name Filter</label>
+        <default>*</default>
+        <prefix>Image="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="commandlinefilter" searchWhenChanged="true">
+        <label>Command Line Filter</label>
+        <default>*</default>
+        <prefix>CommandLine="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="multiselect" token="integritylevelfilter" searchWhenChanged="true">
+        <label>Integrity Level Filter</label>
+        <choice value="*">All</choice>
+        <default>*</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>*</initialValue>
+        <valuePrefix>IntegrityLevel="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter> AND </delimiter>
+        <fieldForLabel>IntegrityLevel</fieldForLabel>
+        <fieldForValue>IntegrityLevel</fieldForValue>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 | stats count by IntegrityLevel</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </input>
+      <input type="text" token="parentimagefilter" searchWhenChanged="true">
+        <label>Parent Image Filter</label>
+        <default>*</default>
+        <prefix>ParentImage="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="parentcommandlinefilter" searchWhenChanged="true">
+        <label>Parent Command Line Filter</label>
+        <default>*</default>
+        <prefix>ParentCommandLine="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search base="processindicatorsearch">
+          <query>Table UtcTime Computer User ParentImage CurrentDirectory CommandLine  IntegrityLevel "Image Loaded"</query>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>System Utilities Commonly Used for Persistence or Lateral Movement</title>
+      <table>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 (Image="*rar.exe*" OR Image="*at.exe*" OR (ParentImage!="C:\\Windows\\System32\\wsqmcons.exe" AND Image="*schtasks.exe*") OR Image="*psexec.exe*" OR Image="*psloggedon.exe*" OR Image="*procdump.exe*" OR Image="*net.exe*" OR Image="*reg.exe*" OR (ParentImage!="*C:\\Windows\\System32\\services.exe*" AND Image="*sc.exe*") OR ParentImage="*rar.exe*" OR ParentImage="*at.exe*" OR ParentImage="*schtasks.exe*" OR ParentImage="*psexec.exe*" OR ParentImage="*psloggedon.exe*" OR ParentImage="*procdump.exe*" OR ParentImage="*net.exe*" OR ParentImage="*reg.exe*" OR ParentImage="*sc.exe*") Computer="***" Image="***" User="***" CommandLine="***" ParentImage="***" ParentCommandLine="***" (IntegrityLevel="*") |rename Image AS "Image Loaded"|sort - UtcTime |Table UtcTime Computer User ParentImage CurrentDirectory CommandLine  IntegrityLevel "Image Loaded"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Suspicious SVCHost</title>
+      <event>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 Image="*\\svchost.exe*" CommandLine!="* -k -*" (Image!="C:\\Windows\\System32\\svchost.exe" OR Image!="C:\\Windows\\SysWOW64\svchost.exe") ParentImage!="C:\\Windows\\System32\\services.exe"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">full</option>
+        <option name="rowNumbers">0</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.sortDirection">asc</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+      </event>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Rare System Processes (By Hash)</title>
+      <table>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 (Image="*explorer.exe*" OR Image="*svchost.exe*" OR Image="*services.exe*" OR Image="*lsass.exe*") |rex field=Hashes "SHA1=(?&lt;SHA1&gt;[^,]+)"|rex field=Hashes "MD5=(?&lt;MD5&gt;[^,]+)"|rex field=Hashes "SHA256=(?&lt;SHA256&gt;[^,]+)"|rex field=Hashes "IMPHASH=(?&lt;IMPHASH&gt;[^,]+)"| Rare Image MD5 SHA1 SHA256 IMPHASH</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,132 @@
+<form>
+  <label>Log Clearing</label>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true" token="time">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toptable" searchWhenChanged="true">
+      <label>Top vs Table</label>
+      <choice value="Table _time &quot;Originated From&quot; &quot;Occured On&quot; Security_ID Message">Table</choice>
+      <choice value="Top &quot;Originated From&quot; &quot;Occured On&quot; Security_ID">Top</choice>
+      <default>Table _time "Originated From" "Occured On" Security_ID Message</default>
+      <initialValue>Table _time "Originated From" "Occured On" Security_ID Message</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Log Clearing Over Time</title>
+      <chart>
+        <title>Drag a selection over this graph to investigate results</title>
+        <search>
+          <query>index=wineventlog (source="WinEventLog:System" EventCode=104) OR (source="WinEventLog:Security" EventCode=1102) SourceName="Microsoft-Windows-Eventlog" | timechart count</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <selection>
+          <set token="selection.earliest">$start$</set>
+          <set token="selection.latest">$end$</set>
+          <set token="start.count">$start.count$</set>
+          <set token="end.count">$end.count$</set>
+        </selection>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.masterLegend">null</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.seriesColors">[0x1D2F3E]</option>
+        <option name="height">350</option>
+      </chart>
+      <html>
+                <p>Token Values:</p>
+                <code>New Selected Time Range: $selection.earliest$ - $selection.latest$</code>
+                <br/>
+                <code>Count Value Range: $start.count$ - $end.count$</code>
+      </html>
+    </panel>
+    <panel>
+      <title>Users Clearing Logs</title>
+      <chart>
+        <search>
+          <query>index=wineventlog (source="WinEventLog:System" EventCode=104) OR (source="WinEventLog:Security" EventCode=1102) SourceName="Microsoft-Windows-Eventlog" | eval Translated=coalesce(Translated_SID,Sid)| eval Username=coalesce(Security_ID,Translated) |Top Username</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="height">350</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Hosts Logs Cleared On</title>
+      <chart>
+        <search>
+          <query>index=wineventlog (source="WinEventLog:System" EventCode=104) OR (source="WinEventLog:Security" EventCode=1102) SourceName="Microsoft-Windows-Eventlog"| top ComputerName</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="height">350</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Event Log Clearing</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" EventCode=104 SourceName="Microsoft-Windows-Eventlog" | eval Security_ID=coalesce(Translated_SID,Sid)|Rename src AS "Originated From"|Rename dest AS "Occured On"|sort-_time|$toptable$</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Audit Log Clearing</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode=1102 SourceName="Microsoft-Windows-Eventlog" |Rename src AS "Originated From"|Rename dest AS "Occured On"|Rename EventCodeDescription AS Message|sort-_time|$toptable$</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Log Clearing Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays instances of log clearing within an environment. Typically there is no reason to clear log events, and occurrences could indicate a malicious actor trying to hide malicious activities.</p>
+            <b>Event Log Clearing Panel - Configuration Required</b>
+            <p>The 'Event Log Clearing' window may require configuration in order to translate Security ID's (SID) to usernames depending on your Splunk configuration. If the dashboard is displaying a SID, you can manually look up the SID in Active Directory or configure a SID mapping as follows:</p>
+            <p>1) Export a SID mapping file from your domain environment using powershell using the steps in this article: <a href="http://blogs.technet.com/b/deploymentguys/archive/2009/12/14/creating-a-sid-mapping-file-with-windows-powershell.aspx">Create a SID Mapping File With Powershell.</a>
+        </p>
+            <p>2) Add the results of this export to the SIDLookup.csv file, located in $SPLUNK_HOME\etc\apps\airlock_digital\lookups. Please ensure to retain the correct format of the lookup table at this location when entering data.</p>
+      </html>
+    </panel>
+  </row>
+</form>

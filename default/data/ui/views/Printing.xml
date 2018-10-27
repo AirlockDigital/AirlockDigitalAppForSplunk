@@ -1,0 +1,140 @@
+<form>
+  <label>Printing</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="computernamefiltertoken" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="documentnamefiltertoken" searchWhenChanged="true">
+      <label>Document Name Filter</label>
+      <default>*</default>
+      <prefix>DocumentName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="usernamefiltertoken" searchWhenChanged="true">
+      <label>Username Filter</label>
+      <default>*</default>
+      <prefix>Username="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="printerfiltertoken" searchWhenChanged="true">
+      <label>Printer Filter</label>
+      <default>*</default>
+      <prefix>Printer="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Microsoft-Windows-PrintService/Operational" SourceName="Microsoft-Windows-PrintService" EventCode=307 $computernamefiltertoken$|rex field=Message ", (?&lt;PrinterRex&gt;[^,]+)\\."|rex field=PrinterRex "(?&lt;DocumentName&gt;.+?) owned by "|rex field=Message "owned by(?&lt;DocumentName2&gt;[^,]+)\\."|rex field=DocumentName2 "(?&lt;Username&gt;.+?) on "|rex field=Message " was printed on (?&lt;DocumentName3&gt;[^,]+)\\."|rex field=DocumentName3 "(?&lt;Printer&gt;.+?). Size in bytes"|rex field=Message ". Size in bytes: (?&lt;DocumentName4&gt;[^,]+)\\."|rex field=DocumentName4 "(?&lt;SizeinBytes&gt;.+?). Pages printed:"|rex field=Message "Pages printed:(?&lt;DocumentName5&gt;[^,]+)\\."|rex field=DocumentName5 "(?&lt;Pages&gt;.+?). No user action is required"|search $documentnamefiltertoken$ $usernamefiltertoken$ $printerfiltertoken$|sort -_time | Table _time ComputerName DocumentName Username Printer SizeinBytes Pages</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 30 Users Printing Documents</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Microsoft-Windows-PrintService/Operational" SourceName="Microsoft-Windows-PrintService" EventCode=307 ComputerName="***"|rex field=Message ", (?&lt;PrinterRex&gt;[^,]+)\\."|rex field=PrinterRex "(?&lt;DocumentName&gt;.+?) owned by "|rex field=Message "owned by(?&lt;DocumentName2&gt;[^,]+)\\."|rex field=DocumentName2 "(?&lt;Username&gt;.+?) on "|rex field=Message " was printed on (?&lt;DocumentName3&gt;[^,]+)\\."|rex field=DocumentName3 "(?&lt;Printer&gt;.+?). Size in bytes"|rex field=Message ". Size in bytes: (?&lt;DocumentName4&gt;[^,]+)\\."|rex field=DocumentName4 "(?&lt;SizeinBytes&gt;.+?). Pages printed:"|rex field=Message "Pages printed:(?&lt;DocumentName5&gt;[^,]+)\\."|rex field=DocumentName5 "(?&lt;Pages&gt;.+?). No user action is required"|Top Limit=50 Username</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 30 Printers and Ports Used</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Microsoft-Windows-PrintService/Operational" SourceName="Microsoft-Windows-PrintService" EventCode=307 ComputerName="***"|rex field=Message ", (?&lt;PrinterRex&gt;[^,]+)\\."|rex field=PrinterRex "(?&lt;DocumentName&gt;.+?) owned by "|rex field=Message "owned by(?&lt;DocumentName2&gt;[^,]+)\\."|rex field=DocumentName2 "(?&lt;Username&gt;.+?) on "|rex field=Message " was printed on (?&lt;DocumentName3&gt;[^,]+)\\."|rex field=DocumentName3 "(?&lt;Printer&gt;.+?). Size in bytes"|rex field=Message ". Size in bytes: (?&lt;DocumentName4&gt;[^,]+)\\."|rex field=DocumentName4 "(?&lt;SizeinBytes&gt;.+?). Pages printed:"|rex field=Message "Pages printed:(?&lt;DocumentName5&gt;[^,]+)\\."|rex field=DocumentName5 "(?&lt;Pages&gt;.+?). No user action is required"|Top Limit=50 Printer</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Printing Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays print events in your environment and allows you to interrogate them.</p>
+            <b>Printing Dashboard - Configuration Required</b>
+            <p>You must be collecting Event ID=307 in order for this dashboard to display events. 'Microsoft Windows -> Print Service -> Operational' logging must be enabled (it is disabled by default on most Windows builds). There is no group policy to enable this setting, instead it must be enabled by running a command on the computer, please see the following link for more information   <a href="https://social.technet.microsoft.com/Forums/en-US/15030756-fd74-4481-8b09-007a8de74f00/changing-group-policy-through-scripting?forum=ITCG">Enabling PrintService Operational Logging</a> </p>
+      </html>
+    </panel>
+  </row>
+</form>

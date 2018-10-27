@@ -1,0 +1,82 @@
+<form>
+  <label>Command Line</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <input type="text" token="hostname_filter" searchWhenChanged="true">
+        <label>Hostname Filter</label>
+        <default>*</default>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="parent_process_filter" searchWhenChanged="true">
+        <label>Parent Process Filter</label>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+      </input>
+      <input type="text" token="path_filter" searchWhenChanged="true">
+        <label>Folder Path Filter</label>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+      </input>
+      <input type="text" token="file_name_filter" searchWhenChanged="true">
+        <label>File Name Filter</label>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+      </input>
+      <input type="text" token="command_line_filter" searchWhenChanged="true">
+        <label>Command Line Filter</label>
+        <default>*</default>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="dropdown" token="blankcmdline" searchWhenChanged="true">
+        <label>Show Blank Cmd Line?</label>
+        <choice value="=&quot;*">Yes</choice>
+        <choice value="!=&quot;">No</choice>
+        <prefix>commandline</prefix>
+        <suffix>"</suffix>
+        <default>!="</default>
+        <initialValue>!="</initialValue>
+      </input>
+      <input type="dropdown" token="uniqcmdline" searchWhenChanged="true">
+        <label>Show Unique Cmd Line?</label>
+        <choice value="| dedup commandline |">Yes</choice>
+        <choice value="|">No</choice>
+        <default>|</default>
+        <initialValue>|</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage hostname=$hostname_filter$ path=$path_filter$ filename=$file_name_filter$ parentprocess=$parent_process_filter$ commandline=$command_line_filter$ $blankcmdline$|eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") $uniqcmdline$ sort - _time | Table datetime hostname username parentprocess path filename commandline</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

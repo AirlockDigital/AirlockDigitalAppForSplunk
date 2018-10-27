@@ -1,0 +1,349 @@
+<form script="powershell.js">
+  <label>PowerShell</label>
+  <search id="powershellsearch">
+    <query>index="wineventlog" source="WinEventLog:Windows PowerShell" EventCode=800 TaskCategory="Pipeline Execution Details"
+| rex field=Message mode=sed "s/\s{2,}//g"
+| eval InitialMessage=split(Message,"Context Information:"), InitialMessage=mvindex(InitialMessage,0), SequenceNumberTemp=split(Message,"SequenceNumber="), SequenceNumberTemp=mvindex(SequenceNumberTemp,1), SequenceNumberTemp=split(SequenceNumberTemp,"UserId="), Sequence_Number=mvindex(SequenceNumberTemp,0), UserTemp=split(Message,"UserId="), UserTemp=mvindex(UserTemp,1), UserTemp=split(UserTemp,"HostName="), User_Name=mvindex(UserTemp,0), HostNameTemp=split(Message,"HostName="), HostNameTemp=mvindex(HostNameTemp,1), HostNameTemp=split(HostNameTemp,"HostVersion="), Host_Name=mvindex(HostNameTemp,0), HostIdTemp=split(Message,"HostId="), HostIdTemp=mvindex(HostIdTemp,1), HostIdTemp=split(HostIdTemp,"EngineVersion="), Host_Id=mvindex(HostIdTemp,0), HostApplicationTemp=split(Host_Id,"HostApplication="), Host_Application=mvindex(HostApplicationTemp,1), Host_Id=mvindex(HostApplicationTemp,0), EngineVersionTemp=split(Message,"EngineVersion="), EngineVersionTemp=mvindex(EngineVersionTemp,1), EngineVersionTemp=split(EngineVersionTemp,"RunspaceId="), Engine_Version=mvindex(EngineVersionTemp,0), RunSpaceTemp=split(Message,"RunspaceId="), RunSpaceTemp=mvindex(RunSpaceTemp,1), RunSpaceTemp=split(RunSpaceTemp,"PipelineId="), Runspace_Id=mvindex(RunSpaceTemp,0), PipelineIdTemp=split(Message,"PipelineId="), PipelineIdTemp=mvindex(PipelineIdTemp,1), PipelineIdTemp=split(PipelineIdTemp,"ScriptName="), Pipeline_Id=mvindex(PipelineIdTemp,0), ScriptNameTemp=split(Message,"ScriptName="), ScriptNameTemp=mvindex(ScriptNameTemp,1),  ScriptNameTemp=split(ScriptNameTemp,"CommandLine="), Script_Name=mvindex(ScriptNameTemp,0), CommandLineTemp=split(Message,"CommandLine="), CommandLineTemp=mvindex(CommandLineTemp,1), CommandLineTemp=split(CommandLineTemp,"Details:"), Command_Line=mvindex(CommandLineTemp,0), DetailsTemp=split(Message,"Details:"), Details=mvindex(DetailsTemp,1)
+| search User_Name=$usernamefilter|s$ Script_Name=$scriptnamefilter|s$ $commandlinefilter$ $suspiciouscommands$ $stringseverity$
+</query>
+    <earliest>$selection.earliest$</earliest>
+    <latest>$selection.latest$</latest>
+  </search>
+  <search id="powershellscriptblocksearch">
+    <query>index="wineventlog" source="WinEventLog:Microsoft-Windows-PowerShell/Operational" (EventCode=4100 OR EventCode=4103 OR EventCode=4104) $commandlinefilter$
+| lookup suspect_ps_strings Suspect_String AS Message OUTPUT Suspect_String_Category Suspect_String String_Severity $stringseverity$
+</query>
+    <earliest>$selection.earliest$</earliest>
+    <latest>$selection.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="timetoken" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-1d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="suspiciouscommands" searchWhenChanged="true">
+      <label>Show Only Suspicious Runspaces</label>
+      <choice value="| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity">No</choice>
+      <choice value="| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity| search Suspect_String_Category=&quot;*&quot;">Yes</choice>
+      <default>| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity</default>
+      <initialValue>| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity</initialValue>
+    </input>
+    <input type="dropdown" token="stringseverity" searchWhenChanged="true">
+      <label>Show Only High Severity Strings</label>
+      <choice value="| search (String_Severity=&quot;low&quot; OR String_Severity=&quot;high&quot;)">No</choice>
+      <choice value="| search String_Severity=&quot;high&quot;">Yes</choice>
+      <default>| search (String_Severity="low" OR String_Severity="high")</default>
+      <initialValue>| search (String_Severity="low" OR String_Severity="high")</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>index="wineventlog" source="WinEventLog:Windows PowerShell" EventCode=400 
+| eval EngineVersionTemp=split(Message,"EngineVersion="), EngineVersionTemp=mvindex(EngineVersionTemp,1), EngineVersionTemp=split(EngineVersionTemp,"RunspaceId="), Engine_Version=mvindex(EngineVersionTemp,0), Engine_Version = substr(Engine_Version,1,3)
+| search Engine_Version="2.0"
+| eval HostNameTemp=split(Message,"HostName="), HostNameTemp=mvindex(HostNameTemp,1), HostNameTemp=split(HostNameTemp,"HostVersion="), Host_Name=mvindex(HostNameTemp,0), RunSpaceTemp=split(Message,"RunspaceId="), RunSpaceTemp=mvindex(RunSpaceTemp,1), RunSpaceTemp=split(RunSpaceTemp,"PipelineId="), Runspace_Id=mvindex(RunSpaceTemp,0)
+| dedup Runspace_Id
+| stats count</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="height">50</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="underLabel">PowerShell v2 Launches (drilldown)</option>
+        <option name="useColors">1</option>
+        <drilldown target="_blank">
+          <condition>
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_v2_launch_viewer?form.timetoken.earliest=$selection.earliest$&form.timetoken.latest=$selection.latest$]]>
+            </link>
+          </condition>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="powershellsearch">
+          <query>
+| search Suspect_String_Category="*"
+| dedup Runspace_Id
+| stats count
+| rangemap field=count</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xd93f3c","0xd93f3c","0xf58f39","0xd93f3c"]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="underLabel">Suspicious PowerShell runspaces</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>index="wineventlog" source="WinEventLog:Microsoft-Windows-PowerShell/Operational" (EventCode=4100 OR EventCode=4103 OR EventCode=4104) Type=Warning | stats count</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xd93f3c"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="underLabel">PowerShell v5 Script Block Warning Events (possibly malicious drilldown)</option>
+        <option name="useColors">1</option>
+        <drilldown target="_blank">
+          <condition>
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_script_block_computer_inspector?form.timetoken.earliest=$selection.earliest$&form.timetoken.latest=$selection.latest$&form.powershellwarningevents=Type%3D"Warning"]]>
+            </link>
+          </condition>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Number of PowerShell events over time (drag select to filter)</title>
+        <search>
+          <query>|tstats count WHERE index="wineventlog" (source="WinEventLog:Windows PowerShell" OR source="WinEventLog:Microsoft-Windows-PowerShell/Operational") by _time span=1m</query>
+          <earliest>$timetoken.earliest$</earliest>
+          <latest>$timetoken.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <selection>
+          <set token="selection.earliest">$start$</set>
+          <set token="selection.latest">$end$</set>
+        </selection>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.chart.resultTruncationLimit">500000</option>
+        <option name="charting.data.count">500000</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="height">200</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="dropdown" token="excludewindowsscripts" searchWhenChanged="true">
+        <label>Exclude %windir%\system32 scripts</label>
+        <choice value="Script_Name!=&quot;dontmatch12345678789&quot;">No</choice>
+        <choice value="Script_Name!=&quot;*\\Windows\\System32\\*&quot;">Yes</choice>
+        <default>Script_Name!="dontmatch12345678789"</default>
+        <initialValue>Script_Name!="dontmatch12345678789"</initialValue>
+      </input>
+      <input type="text" token="scriptnamefilter" searchWhenChanged="true">
+        <label>Script Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <title>Script Names Executed (Top / Rare)</title>
+        <search base="powershellsearch">
+          <query>search $excludewindowsscripts$ |$toprare$ Script_Name | rename count as "# of cmd's"</query>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <condition field="Script_Name">
+            <set token="scriptnamefilter">$click.value$</set>
+          </condition>
+        </drilldown>
+      </table>
+      <html>
+        <code>Current Script Name Filter Value: $scriptnamefilter$</code>
+      </html>
+    </panel>
+    <panel>
+      <input type="dropdown" token="toprare" searchWhenChanged="true">
+        <label>Top / Rare</label>
+        <choice value="Top">Top</choice>
+        <choice value="Rare">Rare</choice>
+        <default>Top</default>
+        <initialValue>Top</initialValue>
+      </input>
+      <input type="text" token="usernamefilter" searchWhenChanged="true">
+        <label>User / Computer Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <title>User Names Generating Events (Top / Rare)</title>
+        <search base="powershellsearch">
+          <query>$toprare$ User_Name</query>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <condition field="User_Name">
+            <set token="usernamefilter">$click.value$</set>
+          </condition>
+        </drilldown>
+      </table>
+      <html>
+        <code>Current User / Computer Filter Value: $usernamefilter$</code>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="text" token="commandlinefilter" searchWhenChanged="true">
+        <label>Command String Search</label>
+        <default>*</default>
+        <prefix>Message="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <title>Powershell Module Logs - Runspace Inspector (v3 / v4 / v5)</title>
+        <search base="powershellsearch">
+          <query>| stats count by Host_Name User_Name Runspace_Id |rename count AS "Number of Suspicious Commands in Runspace"| sort - "Number of Suspicious Commands in Runspace"|Table Host_Name User_Name Runspace_Id "Number of Suspicious Commands in Runspace"|rename Runspace_Id as "Runspace Id (click to drilldown)"</query>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown target="_blank">
+          <condition field="Runspace Id (click to drilldown)">
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_runspace_viewer?form.timetoken.earliest=$selection.earliest$&form.timetoken.latest=$selection.latest$&form.runspace=$click.value2$]]>
+            </link>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Powershell Script Block Logs - Script Inspector (v5 only)</title>
+        <search base="powershellscriptblocksearch">
+          <query>
+| eval ScriptNameTemp=split(Message,"Script Name = "), ScriptNameTemp=mvindex(ScriptNameTemp,1), ScriptNameTemp=split(ScriptNameTemp,"Command Path ="), Script_Name1=mvindex(ScriptNameTemp,0), ScriptNameTemp2=split(Message,"ScriptBlock ID: "), ScriptNameTemp2=mvindex(ScriptNameTemp2,1), ScriptNameTemp2=split(ScriptNameTemp2,"Path: "), Script_Name2=mvindex(ScriptNameTemp2,1), Script_Name = coalesce(Script_Name1, Script_Name2)
+| stats count by Script_Name
+| rex field=Script_Name mode=sed "s/\s{2,}//g"
+| rename count as "Number of Suspicious Events in Script"
+| sort - "Number of Suspicious Events in Script"
+| rename Script_Name as "Script Name (click to drilldown)"</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown target="_blank">
+          <condition field="Script Name (click to drilldown)">
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_script_block_computer_inspector?form.timetoken.earliest=$selection.earliest$&form.timetoken.latest=$selection.latest$&form.scriptnamefilter=$click.value2$&form.suspiciouscommands=%7C%20lookup%20suspect_ps_strings%20Suspect_String%20AS%20Message%20OUTPUT%20Suspect_String_Category%20Suspect_String%20String_Severity%7C%20search%20Suspect_String_Category%3D"*"]]>
+            </link>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Powershell Script Block Logs - Computer Inspector (v5 only)</title>
+        <search>
+          <query>
+            index="wineventlog" source="WinEventLog:Microsoft-Windows-PowerShell/Operational" (EventCode=4100 OR EventCode=4103 OR EventCode=4104) $commandlinefilter$
+| lookup suspect_ps_strings Suspect_String AS Message OUTPUT Suspect_String_Category Suspect_String String_Severity $stringseverity$
+| stats count by ComputerName
+| rename count as "Number of Suspicious Events on Host"
+| sort - "Number of Suspicious Events on Host"
+| rename ComputerName as "Computer Name (click to drilldown)"</query>
+    <earliest>$selection.earliest$</earliest>
+    <latest>$selection.latest$</latest>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown target="_blank">
+          <condition field="Computer Name (click to drilldown)">
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_script_block_computer_inspector?form.timetoken.earliest=$selection.earliest$&form.timetoken.latest=$selection.latest$&form.computernamefilter=$click.value2$&form.suspiciouscommands=%7C%20lookup%20suspect_ps_strings%20Suspect_String%20AS%20Message%20OUTPUT%20Suspect_String_Category%20Suspect_String%20String_Severity%7C%20search%20Suspect_String_Category%3D"*"]]>
+            </link>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>PowerShell Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays PowerShell log events from across your environment and is designed to facilitate interrogation and automatic suspicious PowerShell script detection.</p>
+            <p>This dashboard supports PowerShell module logging and script block / invocation logging.</p>
+            <p>PowerShell v2 does not support command logging, so only PowerShell v2 launches can be seen. Note: Attackers may downgrade to PowerShell v2 to run malicious scripts to avoid detection.</p>
+            <p>The suspicious word list used for detection is contained in the lookup table 'Suspect_PS_Strings.csv' and can be modified to suit your environment and elimate false positives. Words in this list can be assigned 'low' or 'high' severity as needed.</p>
+            <br/>
+            <b>Powershell - Configuration Required</b>
+            <p>In order for data to be displayed in this dashboard, Splunk must be configured to collect PowerShell events from hosts within your environment from the following locations:</p>
+            <p>WinEventLog:Windows PowerShell and WinEventLog:Microsoft-Windows-PowerShell/Operational</p>
+            <p>Additionally PowerShell module logging and/or script block - invocation logging must be enabled in Group Policy.</p>
+            <br/>
+            <b>What Group Policy Settings Do I Need?</b>
+            <p>Set the following in group policy:</p>
+            <p>Module Logging: Computer Configuration -&gt; Administrative Templates -&gt; Windows Components -&gt; Windows PowerShell -&gt; Turn on Module Logging -&gt; Enabled. In the additional 'Show' section, simply put in a wildcard * character to log all PowerShell activity.</p>
+            <p>Script Block Logging (Need Win 10 / 2016 GP Templates): Computer Configuration -&gt; Administrative Templates -&gt; Windows Components -&gt; Windows PowerShell -&gt; Turn on PowerShell Script Block Logging -&gt; Enabled. If possible please also enable 'Log script block invocation start / stop events'</p>
+      </html>
+    </panel>
+  </row>
+</form>

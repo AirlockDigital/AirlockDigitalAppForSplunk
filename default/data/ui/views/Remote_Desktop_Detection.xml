@@ -1,0 +1,149 @@
+<form script="autodiscover.js">
+  <label>Remote Desktop Detection</label>
+  <search id="remotedesktoploginsearch">
+    <query>index=wineventlog source="WinEventLog:Security" EventCode=4624 Logon_Type="10" $destinationcomputernamefilter$ $securityidfilter$| lookup IPRemoteDesktopLookup Source_Network_Address as Source_Network_Address OUTPUT Known_Hostname| eval Source_Network_Address=coalesce(Known_Hostname,Source_Network_Address)| search $sourcenetworkfilter$|eval Account = mvindex(Security_ID, 1)</query>
+    <earliest>$selection.earliest$</earliest>
+    <latest>$selection.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toprare" searchWhenChanged="true">
+      <label>Top/Rare Usernames</label>
+      <choice value="Top Account">Top</choice>
+      <choice value="Rare Account">Rare</choice>
+      <default>Top Account</default>
+      <initialValue>Top Account</initialValue>
+    </input>
+    <input type="text" token="sourcenetworkfilter" searchWhenChanged="true">
+      <label>Source Network Filter</label>
+      <default>*</default>
+      <prefix>(Source_Network_Address=*</prefix>
+      <suffix>*)</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="securityidfilter" searchWhenChanged="true">
+      <label>Security ID Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="destinationcomputernamefilter" searchWhenChanged="true">
+      <label>Destination Computer Name Filter</label>
+      <default>*</default>
+      <prefix>(ComputerName=*</prefix>
+      <suffix>*)</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search base="remotedesktoploginsearch">
+          <query>|dedup Security_ID| stats count| rangemap field=count low=0-200 severe=201-5000000</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">Unique Remote Desktop Logins by User - Total</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Remote Desktop Connections Over Time</title>
+      <chart>
+        <title>Drag a selection over this graph to investigate results</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode=4624 Logon_Type="10" $destinationcomputernamefilter$ $securityidfilter$| timechart count</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <selection>
+          <set token="selection.earliest">$start$</set>
+          <set token="selection.latest">$end$</set>
+		  <eval token="selection.earliest">$selection.earliest$-1</eval>
+        </selection>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.masterLegend">null</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.seriesColors">[0x1D2F3E]</option>
+        <option name="height">250</option>
+      </chart>
+      <chart>
+        <title>Usernames Performing Remote Desktop Connections (Top/Rare)</title>
+        <search base="remotedesktoploginsearch">
+          <query>| $toprare$</query>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.legend.masterLegend">null</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="height">750</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Remote Desktop Logins Map (Source IP's -&gt; Destination)</title>
+      <viz type="airlock_digital.parallel_coordinates">
+        <search base="remotedesktoploginsearch">
+          <query>| table Source_Network_Address ComputerName</query>
+        </search>
+        <option name="airlock_digital.parallel_coordinates.colorMode">categorical</option>
+        <option name="height">1000</option>
+      </viz>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="dropdown" searchWhenChanged="true" token="resultfilter">
+        <label>Result Filter</label>
+        <choice value="*">Login &amp; Logoff</choice>
+        <choice value="An account was successfully logged on">Login Only</choice>
+        <choice value="An account was logged off">Logoff Only</choice>
+        <default>An account was successfully logged on</default>
+        <initialValue>An account was successfully logged on</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode=4624 OR EventCode=4634) Logon_Type="10" signature="$resultfilter$" $securityidfilter$ $destinationcomputernamefilter$ | lookup IPRemoteDesktopLookup Source_Network_Address as Source_Network_Address OUTPUT Known_Hostname| eval Source_Network_Address=coalesce(Known_Hostname,Source_Network_Address)| search $sourcenetworkfilter$|replace "NT AUTHORITY\SYSTEM" WITH "" IN Security_ID| Rename signature AS Result |Rename ComputerName AS "Destination Computer Name" |sort-_time| Table _time Source_Network_Address Security_ID "Destination Computer Name" Result</query>
+          <earliest>$selection.earliest$</earliest>
+          <latest>$selection.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Remote Desktop Detection Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays remote desktop login events across your environment. Use the graph in the top left to select specific timeframes you may want more detail on.</p>
+            <b>Remote Desktop Detection - Configuration Required</b>
+            <p>Remote Desktop login events only contain the 'source network address' (IP Address) of the connecting host, rather than the domain name. This Dashboard uses a lookup table, that allows you to put in known 'source network addresses' and corresponding descriptions. This can be used to populate the dashboard with hostnames or other labels to better identify the source of connections, consider using this as a way to 'tag' or check off known good endpoints. This lookup table is located in $SPLUNK_HOME\etc\apps\splunk_operations_security\lookups. Please ensure to retain the correct format of the lookup table at this location when entering data.</p>
+            <b>Ideas</b>
+            <p>Consider looking for remote desktop connections that originate from your DMZ environment or remote desktop logins that occur outside of business hours with no associated change controls.</p>
+            <b>Limitations</b>
+            <p>This dashboard uses external Javascript to display the network connections map, this may not display correctly on all browsers.</p>
+            <p>The Remote Desktop Logins Map requires at least two refrence points on each column in order to display data, For Example: If you search for a username and that user has only connected from a single source to a single destination, the graph will not display.</p>
+      </html>
+    </panel>
+  </row>
+</form>

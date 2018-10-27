@@ -1,0 +1,300 @@
+<form>
+  <label>Activity Viewer</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="parent_policy" searchWhenChanged="true">
+      <label>Parent Group Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <choice value="*">All</choice>
+      <fieldForLabel>parentgroup</fieldForLabel>
+      <fieldForValue>parentgroup</fieldForValue>
+      <search>
+        <query>sourcetype=airlock event=FileActivityMessage |Top parentgroup</query>
+      </search>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+    </input>
+    <input type="dropdown" token="sub_policy_filter" searchWhenChanged="true">
+      <label>Group Filter</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>group</fieldForLabel>
+      <fieldForValue>group</fieldForValue>
+      <search>
+        <query>sourcetype=airlock event=FileActivityMessage parentgroup=$parent_policy$| Top group</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+    </input>
+    <input type="dropdown" token="deduplicate" searchWhenChanged="true">
+      <label>Deduplicate</label>
+      <choice value="|">No</choice>
+      <choice value="| dedup sha256 |">Yes</choice>
+      <default>|</default>
+      <initialValue>|</initialValue>
+    </input>
+    <input type="text" token="execution_filter" searchWhenChanged="true">
+      <label>Execution Type Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <prefix>"*</prefix>
+      <suffix>*"</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <input type="text" token="hostname_filter" searchWhenChanged="true">
+        <label>Hostname Filter</label>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+      </input>
+      <input type="text" token="username_filter" searchWhenChanged="true">
+        <label>Username Filter</label>
+        <default>*</default>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="path_filter" searchWhenChanged="true">
+        <label>Folder Path Filter</label>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+      </input>
+      <input type="text" token="publisherflt" searchWhenChanged="true">
+        <label>Publisher Filter</label>
+        <default>*</default>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="parentprocessfilt" searchWhenChanged="true">
+        <label>Parent Process Filter</label>
+        <default>*</default>
+        <prefix>"*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval sha256=substr(sha256,1,7) | eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Table datetime hostname username path filename publisher parentprocess execution_type parentgroup group sha256 </query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | stats count as Total</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c","0xd93f3c"]</option>
+        <option name="underLabel">Event Count</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 10 Hostnames</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 hostname</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 10 Usernames</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 username</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 10 Folders</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 path</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 10 Publishers</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 publisher</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 10 Parent Processes</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 parentprocess</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>

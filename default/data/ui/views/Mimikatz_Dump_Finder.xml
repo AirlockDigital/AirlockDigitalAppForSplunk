@@ -1,0 +1,154 @@
+<form>
+  <search id="mimikatzsearch">
+    <query>index=wineventlog sourcetype=XmlWinEventLog:Microsoft-Windows-Sysmon/Operational EventCode=10  SourceImage!="C:\\Windows\\system32\\taskmgr.exe" TargetImage="C:\\Windows\\system32\\lsass.exe" $computerfilter$ $sourceimagefilter$ $securityidfilter$|sort - UtcTime|</query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <label>Mimikatz / Credential Dump Finder</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toprare" searchWhenChanged="true">
+      <label>Charts Top / Rare</label>
+      <choice value="Top">Top</choice>
+      <choice value="Rare">Rare</choice>
+      <initialValue>Rare</initialValue>
+      <default>Rare</default>
+    </input>
+  </fieldset>
+      <row>
+    <panel>
+      <single>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"| dedup index | stats count as numberofevents| rangemap field=numberofevents low=1-50 default=severe | replace 0 with "No SysMon Events in previous 15 minutes, Check SysMon Logger" | replace 1 with "SysMon Events Logging OK"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0xd93f3c","0x65a637"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <option name="height">50</option>
+      </single>
+    </panel>
+    </row>
+  <row>
+    <panel>
+      <input type="text" token="computerfilter" searchWhenChanged="true">
+        <label>Computer Name Filter</label>
+        <default>*</default>
+        <prefix>Computer="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="securityidfilter" searchWhenChanged="true">
+        <label>SecurityID Filter</label>
+        <default>*</default>
+        <prefix>SecurityID="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="sourceimagefilter" searchWhenChanged="true">
+        <label>Source Image Filter</label>
+        <default>*</default>
+        <prefix>SourceImage="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search base="mimikatzsearch">
+          <query>|Table UtcTime Computer SecurityID SourceImage TargetImage</query>
+        </search>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Source Image</title>
+      <chart>
+        <title>Look for suspicious processes accessing LSASS here. Pay attention to interpreters, particularly Powershell.</title>
+        <search base="mimikatzsearch">
+          <query>| $toprare$ SourceImage</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Security IDs</title>
+      <chart>
+        <search base="mimikatzsearch">
+          <query>| $toprare$ SecurityID</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Target Image (Always LSASS)</title>
+      <chart>
+        <search base="mimikatzsearch">
+          <query>| $toprare$ TargetImage</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Computers</title>
+      <chart>
+        <search base="mimikatzsearch">
+          <query>| $toprare$ Computer</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Mimikatz / Credential Dump Finder Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard looks at process access to the Windows Local Security Authority Subsystem Service (LSASS) which handles Windows credentials.</p>
+            <p>Look for processes such as unknown executables or interpreters generating events. Particularly look at events triggered by Powershell interpreters.</p>
+      </html>
+    </panel>
+  </row>
+</form>

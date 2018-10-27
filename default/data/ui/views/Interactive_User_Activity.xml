@@ -1,0 +1,83 @@
+<form>
+  <label>Interactive User Activity</label>
+  <search id="baseSearch">
+    <query>index=wineventlog source="WinEventLog:Security" $usernamefilter$ $computernamefilter$ ((EventCode=4624 OR EventCode=4634) AND (Logon_Type="2")) OR (TaskCategory="Other Logon/Logoff Events") |replace 4800 with "The workstation was locked" IN EventCode|replace 4801 with "The workstation was unlocked" IN EventCode|replace 4802 with "The screen saver was invoked" IN EventCode|replace 4803 with "The screen saver was dismissed" IN EventCode|replace 4624 with "An account was logged on"| replace 4634 with "An account was logged off"</query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="usernamefilter" searchWhenChanged="true">
+      <label>User Name Filter</label>
+      <prefix>Security_ID="*</prefix>
+      <suffix>*"</suffix>
+    </input>
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Activity Over Time</title>
+      <chart>
+        <search base="baseSearch">
+          <query>|timechart span=1m count by EventCode</query>
+        </search>
+        <option name="charting.chart">area</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Computers Used</title>
+      <chart>
+        <search base="baseSearch">
+          <query>|top ComputerName</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Username Confirmation</title>
+      <chart>
+        <search base="baseSearch">
+          <query>|top Security_ID</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title></title>
+      <table>
+        <search base="baseSearch">
+          <query>|sort -_time|Table _time ComputerName Security_ID EventCode</query>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Interactive User Activity Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard allows you to interrogate the interactive activity of an individual user. Interactive activity is being physically located at a computer.</p>
+            <p>This dashboard will display logins, logoff's, locking, unlocking, screensaver active and inactive on computers for a given user.</p>
+            <p>The username confirmation chart is a visual confirmation, to ensure the data being displayed is for the specific user account you wish to look at.</p>
+            <b>Consideration</b>
+            <p>In most cases events will need to be forwarded from your endpoints in order to gather details of locking, unlocking and screensaver activity. Often these events are not logged back to domain controllers due to the volume of activity.</p>
+      </html>
+    </panel>
+  </row>
+</form>

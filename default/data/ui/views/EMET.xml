@@ -1,0 +1,48 @@
+<form>
+  <label>EMET</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="messagefiltertoken" searchWhenChanged="true">
+      <label>Message Filter</label>
+      <default>*</default>
+      <prefix>Message="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>EMET Events</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" SourceName="EMET" (EventCode=1 OR EventCode=2) $messagefiltertoken$| sort -_time |Table _time ComputerName Message</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>EMET Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays events from Microsoft's Enhanced Mitigation Experience Toolkit (EMET). This dashboard requires that EMET events are being collected, which they are not by default.</p>
+      </html>
+    </panel>
+  </row>
+</form>

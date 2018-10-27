@@ -1,0 +1,139 @@
+<form script="account_modifications_layout_width.js">
+  <label>Account Modifications</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Users Added and Removed From Privileged Groups</title>
+      <input type="dropdown" token="grouptypetkn" searchWhenChanged="true">
+        <label>Group Type</label>
+        <choice value="*">All Groups</choice>
+        <choice value="local">Local Group</choice>
+        <choice value="global">Global Group</choice>
+        <choice value="universal">Universal Group</choice>
+        <default>universal</default>
+        <initialValue>universal</initialValue>
+      </input>
+      <input type="multiselect" token="privilegedgroupmonitor" searchWhenChanged="true">
+        <label>Privileged Groups To Monitor</label>
+        <choice value="*">ALL</choice>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <valuePrefix>Group_Name="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter> OR </delimiter>
+        <fieldForLabel>Group_Name</fieldForLabel>
+        <fieldForValue>Group_Name</fieldForValue>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode=4729 OR EventCode=4733 OR EventCode=4757 OR EventCode=4728 OR EventCode=4732 OR EventCode=4756)  | eval "Added To"=Group_Domain + "/" +Group_Name | stats count by Group_Name</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <default>*</default>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="dropdown" token="addedorremoved" searchWhenChanged="true">
+        <label>Add / Removed</label>
+        <choice value="EventCode=4728 OR EventCode=4732 OR EventCode=4756">Added</choice>
+        <choice value="EventCode=4729 OR EventCode=4733 OR EventCode=4757">Removed</choice>
+        <choice value="EventCode=4729 OR EventCode=4733 OR EventCode=4757 OR EventCode=4728 OR EventCode=4732 OR EventCode=4756">Both</choice>
+        <default>EventCode=4729 OR EventCode=4733 OR EventCode=4757 OR EventCode=4728 OR EventCode=4732 OR EventCode=4756</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>EventCode=4729 OR EventCode=4733 OR EventCode=4757 OR EventCode=4728 OR EventCode=4732 OR EventCode=4756</initialValue>
+      </input>
+      <input type="text" token="memberfiltergroup" searchWhenChanged="true">
+        <label>Member Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" $addedorremoved$ MSADGroupType="$grouptypetkn$" $privilegedgroupmonitor$ | eval "Target Group"=Group_Domain + "/" +Group_Name | eval "Member"=src_nt_domain + "/" + member |Rename ComputerName AS "On Computer" |search "Member"="$memberfiltergroup$" |Table "Member" "Target Group" "On Computer" EventCodeDescription</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Account Creations &amp; Deletions Over Time</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode=4720 OR EventCode=4726) |replace "4720" WITH "Account Creations" IN EventCode |replace "4726" WITH "Account Deletions" IN EventCode | timechart span=1h count by EventCode</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>User Account Creations / Deletions</title>
+      <input type="dropdown" token="creationdeletiontoken" searchWhenChanged="true">
+        <label>Account Creations / Deletions</label>
+        <choice value="EventCode=&quot;4720&quot; |eval &quot;Account Created By&quot; = mvindex(Security_ID, 0)|eval &quot;New Account Name&quot; = mvindex(Security_ID, 1)|sort -_time| Table _time &quot;Account Created By&quot; &quot;New Account Name&quot; Account_Expires Home_Directory Profile_Path">Creation</choice>
+        <choice value="EventCode=&quot;4726&quot; |eval &quot;Account Deleted By&quot; = mvindex(Security_ID, 0)|eval &quot;AccountDel1&quot; = mvindex(Account_Name, 1)|eval &quot;AccountDel&quot; = mvindex(Account_Domain, 1)| eval &quot;Account Deleted&quot;=AccountDel + &quot;\\&quot; + AccountDel1 |sort -_time| Table _time &quot;Account Deleted By&quot; &quot;Account Deleted&quot;">Deletion</choice>
+        <default>EventCode="4720" |eval "Account Created By" = mvindex(Security_ID, 0)|eval "New Account Name" = mvindex(Security_ID, 1)|sort -_time| Table _time "Account Created By" "New Account Name" Account_Expires Home_Directory Profile_Path</default>
+        <initialValue>EventCode="4720" |eval "Account Created By" = mvindex(Security_ID, 0)|eval "New Account Name" = mvindex(Security_ID, 1)|sort -_time| Table _time "Account Created By" "New Account Name" Account_Expires Home_Directory Profile_Path</initialValue>
+      </input>
+      <input type="text" token="accountnamefilter" searchWhenChanged="true">
+        <label>Account Created / Deleted By Filter</label>
+        <default>*</default>
+        <prefix>Security_ID="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" $accountnamefilter$ $creationdeletiontoken$</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Account Modifications Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays account modification events from across your environment, in addition to user account creations and deletions. For best results collect logs from your domain controllers and endpoints within your environment.</p>
+            <p>Users Added to Privileged Groups - Configuration Required</p>
+            <p>By default this panel displays all user additions to groups in your environment. Clicking the multiselector in this panel will allow you to only add the group names you wish to monitor to the dashboard. If the group you wish to monitor is not available for selection, try searching for a scope of 'all time'. To add the domains you wish to monitor permanently to the multiselector, please click the edit button on this dashboard and the pencil icon next to the multi select to add the desired default domains.</p>
+            <b>Three Types of Groups</b>
+            <p>There are three main types of groups when it comes to account modifications, these are Local Groups, Global Groups and Universal Groups.</p>
+            <p>For more information on Group's please see the following TechNet article: <a href="https://technet.microsoft.com/en-us/library/cc755692(v=ws.10).aspx">Group Scope</a> </p>
+      </html>
+    </panel>
+  </row>
+</form>

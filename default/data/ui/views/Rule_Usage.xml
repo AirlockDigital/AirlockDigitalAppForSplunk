@@ -1,0 +1,67 @@
+<form>
+  <label>Rule Usage</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="sub_policy_filter" searchWhenChanged="true">
+      <label>Policy Filter</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>group</fieldForLabel>
+      <fieldForValue>group</fieldForValue>
+      <search>
+        <query>sourcetype=airlock event=FileActivityMessage | Top group</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>publisher Rules In Use</title>
+      <table>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type="*Trusted publisher Execution*" group=$sub_policy_filter$| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - count | Top publisher group</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Path Rules In Use</title>
+      <table>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage execution_type="*Trusted Path Execution*" group=$sub_policy_filter$| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - count | Top path group</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

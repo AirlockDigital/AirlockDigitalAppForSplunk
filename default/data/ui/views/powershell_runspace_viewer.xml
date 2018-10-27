@@ -1,0 +1,179 @@
+<form>
+  <label>PowerShell Module Logs - Runspace Inspector</label>
+  <search id="powershellrunspacesearch">
+    <query>index="wineventlog" source="WinEventLog:Windows PowerShell" EventCode=800 TaskCategory="Pipeline Execution Details"
+| rex field=Message mode=sed "s/\s{2,}//g"
+| eval InitialMessage=split(Message,"Context Information:"), InitialMessage=mvindex(InitialMessage,0), SequenceNumberTemp=split(Message,"SequenceNumber="), SequenceNumberTemp=mvindex(SequenceNumberTemp,1), SequenceNumberTemp=split(SequenceNumberTemp,"UserId="), Sequence_Number=mvindex(SequenceNumberTemp,0), UserTemp=split(Message,"UserId="), UserTemp=mvindex(UserTemp,1), UserTemp=split(UserTemp,"HostName="), User_Name=mvindex(UserTemp,0), HostNameTemp=split(Message,"HostName="), HostNameTemp=mvindex(HostNameTemp,1), HostNameTemp=split(HostNameTemp,"HostVersion="), Host_Name=mvindex(HostNameTemp,0), HostIdTemp=split(Message,"HostId="), HostIdTemp=mvindex(HostIdTemp,1), HostIdTemp=split(HostIdTemp,"EngineVersion="), Host_Id=mvindex(HostIdTemp,0), HostApplicationTemp=split(Host_Id,"HostApplication="), Host_Application=mvindex(HostApplicationTemp,1), Host_Id=mvindex(HostApplicationTemp,0), EngineVersionTemp=split(Message,"EngineVersion="), EngineVersionTemp=mvindex(EngineVersionTemp,1), EngineVersionTemp=split(EngineVersionTemp,"RunspaceId="), Engine_Version=mvindex(EngineVersionTemp,0), RunSpaceTemp=split(Message,"RunspaceId="), RunSpaceTemp=mvindex(RunSpaceTemp,1), RunSpaceTemp=split(RunSpaceTemp,"PipelineId="), Runspace_Id=mvindex(RunSpaceTemp,0), PipelineIdTemp=split(Message,"PipelineId="), PipelineIdTemp=mvindex(PipelineIdTemp,1), PipelineIdTemp=split(PipelineIdTemp,"ScriptName="), Pipeline_Id=mvindex(PipelineIdTemp,0), ScriptNameTemp=split(Message,"ScriptName="), ScriptNameTemp=mvindex(ScriptNameTemp,1), ScriptNameTemp=split(ScriptNameTemp,"CommandLine="), Script_Name=mvindex(ScriptNameTemp,0), CommandLineTemp=split(Message,"CommandLine="), CommandLineTemp=mvindex(CommandLineTemp,1), CommandLineTemp=split(CommandLineTemp,"Details:"), Command_Line=mvindex(CommandLineTemp,0), DetailsTemp=split(Message,"Details:"), Details=mvindex(DetailsTemp,1)
+| search $runspace$ $suspiciouscommands$
+| $stringseverity$
+      </query>
+    <earliest>$form.timetoken.earliest$</earliest>
+    <latest>$form.timetoken.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="text" token="runspace" searchWhenChanged="true">
+      <label>Runspace Filter</label>
+      <default>*</default>
+      <prefix>Runspace_Id="</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="dropdown" token="suspiciouscommands" searchWhenChanged="true">
+      <label>Show Only Suspicious Cmd Line(s)</label>
+      <choice value="| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity">No</choice>
+      <choice value="| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity| search Suspect_String_Category=&quot;*&quot;">Yes</choice>
+      <default>| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity</default>
+      <initialValue>| lookup suspect_ps_strings Suspect_String AS Command_Line OUTPUT Suspect_String_Category Suspect_String String_Severity</initialValue>
+    </input>
+    <input type="dropdown" token="stringseverity" searchWhenChanged="true">
+      <label>Show Only High Severity Strings</label>
+      <choice value="search">No</choice>
+      <choice value="search String_Severity=&quot;high&quot;">Yes</choice>
+      <default>search</default>
+      <initialValue>search</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search base="powershellrunspacesearch">
+          <query>
+| dedup User_Name
+| fillnull value=Unknown User_Name
+| Top User_Name</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="underLabel">Username commands were executed as</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="powershellrunspacesearch">
+          <query>
+| dedup Engine_Version
+| fillnull value=Unknown Engine_Version
+| Top Engine_Version</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="underLabel">PowerShell Engine Version used</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search base="powershellrunspacesearch">
+          <query>
+| search Script_Name!="C:\\Windows\\System32\\*"
+| dedup Script_Name
+| fillnull value=Unknown Script_Name
+| Top Limit=1 Script_Name
+</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="underLabel">Likely script used in selected runspace (if applicable)</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="powershellrunspacesearch">
+          <query>
+| search String_Severity="low"
+| stats count
+| rangemap field=count</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeValues">[0,2,5,10]</option>
+        <option name="underLabel">Number of Low severity PS Command Lines in selected runspace</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+     <panel>
+      <single>
+        <search base="powershellrunspacesearch">
+          <query>
+| search String_Severity="high"
+| stats count
+| rangemap field=count</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeValues">[0,2,5,10]</option>
+        <option name="underLabel">Number of High severity PS Command Lines in selected runspace</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search base="powershellrunspacesearch">
+          <query>
+| sort Sequence_Number
+| Table _time Host_Application Pipeline_Id Sequence_Number Host_Name Command_Line Suspect_String Suspect_String_Category</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>index="wineventlog" source="WinEventLog:Windows PowerShell" EventCode=800 TaskCategory="Pipeline Execution Details"
+| rex field=Message mode=sed "s/\s{2,}//g"
+| eval InitialMessage=split(Message,"Context Information:"), InitialMessage=mvindex(InitialMessage,0), SequenceNumberTemp=split(Message,"SequenceNumber="), SequenceNumberTemp=mvindex(SequenceNumberTemp,1), SequenceNumberTemp=split(SequenceNumberTemp,"UserId="), Sequence_Number=mvindex(SequenceNumberTemp,0), UserTemp=split(Message,"UserId="), UserTemp=mvindex(UserTemp,1), UserTemp=split(UserTemp,"HostName="), User_Name=mvindex(UserTemp,0), HostNameTemp=split(Message,"HostName="), HostNameTemp=mvindex(HostNameTemp,1), HostNameTemp=split(HostNameTemp,"HostVersion="), Host_Name=mvindex(HostNameTemp,0), HostIdTemp=split(Message,"HostId="), HostIdTemp=mvindex(HostIdTemp,1), HostIdTemp=split(HostIdTemp,"EngineVersion="), Host_Id=mvindex(HostIdTemp,0), HostApplicationTemp=split(Host_Id,"HostApplication="), Host_Application=mvindex(HostApplicationTemp,1), Host_Id=mvindex(HostApplicationTemp,0), EngineVersionTemp=split(Message,"EngineVersion="), EngineVersionTemp=mvindex(EngineVersionTemp,1), EngineVersionTemp=split(EngineVersionTemp,"RunspaceId="), Engine_Version=mvindex(EngineVersionTemp,0), RunSpaceTemp=split(Message,"RunspaceId="), RunSpaceTemp=mvindex(RunSpaceTemp,1), RunSpaceTemp=split(RunSpaceTemp,"PipelineId="), Runspace_Id=mvindex(RunSpaceTemp,0), PipelineIdTemp=split(Message,"PipelineId="), PipelineIdTemp=mvindex(PipelineIdTemp,1), PipelineIdTemp=split(PipelineIdTemp,"ScriptName="), Pipeline_Id=mvindex(PipelineIdTemp,0), ScriptNameTemp=split(Message,"ScriptName="), ScriptNameTemp=mvindex(ScriptNameTemp,1), ScriptNameTemp=split(ScriptNameTemp,"CommandLine="), Script_Name=mvindex(ScriptNameTemp,0), CommandLineTemp=split(Message,"CommandLine="), CommandLineTemp=mvindex(CommandLineTemp,1), CommandLineTemp=split(CommandLineTemp,"Details:"), Command_Line=mvindex(CommandLineTemp,0), DetailsTemp=split(Message,"Details:"), Details=mvindex(DetailsTemp,1)
+| search $runspace$ $suspiciouscommands$
+| $stringseverity$
+| dedup ComputerName
+| Top ComputerName</query>
+    <earliest>$form.timetoken.earliest$</earliest>
+    <latest>$form.timetoken.latest$</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,70,100]</option>
+        <option name="underLabel">Click to Drilldown to Powershell v5 Script Block Logs (if applicable)</option>
+        <option name="useColors">1</option>
+        <drilldown target="_blank">
+          <condition>
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_script_block_computer_inspector?form.timetoken.earliest=$form.timetoken.earliest$&form.timetoken.latest=$form.timetoken.latest$&form.computernamefilter=$click.value2$]]>
+            </link>
+          </condition>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>PowerShell Runspace Viewer Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays the commands that were run during a particular runspace (session) of PowerShell.</p>
+            <p>The table is sorted by sequence number (ascending) so the commands you see were executed in order during this session.</p>
+            <p>Suspicious commands are matched against a word list, this may or may not cause false positives. However if a large number of commands contain suspicious matches, it may indicate malicious activity.</p> 
+      </html>
+    </panel>
+  </row>
+</form>

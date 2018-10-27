@@ -1,0 +1,81 @@
+<form>
+  <label>PowerShell v2 launches</label>
+  <fieldset submitButton="false">
+    <input type="text" token="computernamesearch" searchWhenChanged="true">
+      <label>Computer Name Search</label>
+      <default>*</default>
+      <prefix>"*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <title>Top 10 Computers Launching PowerShell v2 Sessions</title>
+        <search>
+          <query>index="wineventlog" source="WinEventLog:Windows PowerShell" EventCode=400 
+| eval EngineVersionTemp=split(Message,"EngineVersion=")|eval EngineVersionTemp=mvindex(EngineVersionTemp,1)|eval EngineVersionTemp=split(EngineVersionTemp,"RunspaceId=")|eval Engine_Version=mvindex(EngineVersionTemp,0)
+| eval Engine_Version = substr(Engine_Version,1,3)
+| search Engine_Version="2.0"
+| eval HostNameTemp=split(Message,"HostName=")|eval HostNameTemp=mvindex(HostNameTemp,1)|eval HostNameTemp=split(HostNameTemp,"HostVersion=")|eval Host_Name=mvindex(HostNameTemp,0)
+| eval RunSpaceTemp=split(Message,"RunspaceId=")|eval RunSpaceTemp=mvindex(RunSpaceTemp,1)|eval RunSpaceTemp=split(RunSpaceTemp,"PipelineId=")|eval Runspace_Id=mvindex(RunSpaceTemp,0)
+| search ComputerName=$computernamesearch$
+| dedup Runspace_Id
+| Top Limit=10 Engine_Version ComputerName</query>
+          <earliest>$form.timetoken.earliest$</earliest>
+          <latest>$form.timetoken.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>PowerShell v2 launches</title>
+        <search>
+          <query>index="wineventlog" source="WinEventLog:Windows PowerShell" EventCode=400 
+| eval EngineVersionTemp=split(Message,"EngineVersion=")|eval EngineVersionTemp=mvindex(EngineVersionTemp,1)|eval EngineVersionTemp=split(EngineVersionTemp,"RunspaceId=")|eval Engine_Version=mvindex(EngineVersionTemp,0)
+| eval Engine_Version = substr(Engine_Version,1,3)
+| search Engine_Version="2.0"
+| eval HostNameTemp=split(Message,"HostName=")|eval HostNameTemp=mvindex(HostNameTemp,1)|eval HostNameTemp=split(HostNameTemp,"HostVersion=")|eval Host_Name=mvindex(HostNameTemp,0)
+| eval RunSpaceTemp=split(Message,"RunspaceId=")|eval RunSpaceTemp=mvindex(RunSpaceTemp,1)|eval RunSpaceTemp=split(RunSpaceTemp,"PipelineId=")|eval Runspace_Id=mvindex(RunSpaceTemp,0)
+| search ComputerName=$computernamesearch$
+| dedup Runspace_Id
+| sort -_time
+| Table _time Engine_Version ComputerName Runspace_Id</query>
+          <earliest>$form.timetoken.earliest$</earliest>
+          <latest>$form.timetoken.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <title>PowerShell v2 Launches Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays instances of PowerShell v2 execution.</p>
+            <p>PowerShell v2 does not support command logging, so only PowerShell v2 launches can be seen, not the commands that are run.</p>
+            <p>Typically there is no reason for PowerShell v2 to be used in modern environments, launches of PowerShell v2 may be indicative of malicious behaviour.</p> 
+            <p>Attackers can launch Powershell v2 at the command line by simply running 'Powershell.exe -Version 2.</p>
+      </html>
+    </panel>
+  </row>
+</form>

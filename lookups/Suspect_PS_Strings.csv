@@ -1,0 +1,319 @@
+Suspect_String,Suspect_String_Category,String_Severity
+"*user32.dll*",Offensive Powershell,high
+"*secur32.dll*",Offensive Powershell,high
+"*powercat*",Suspicious Strings,high
+"*ntdll.dll*",Offensive Powershell,high
+"*msvcrt.dll*",Offensive Powershell,high
+"*memcpy*",Suspicious Win32 API call,high
+"*kernel32*",Suspicious Win32 API call,high
+"*ZeroFreeGlobalAllocUnicode*",Suspicious Win32 API call,high
+"*WriteProcessMemory*",Suspicious Win32 API call,high
+"*WriteInt32*",Suspicious Win32 API call,high
+"*WriteByte*",Suspicious Win32 API call,high
+"*Write-UserAddServiceBinary*",Suspicious Strings,high
+"*Write-UserAddMSI*",Suspicious Strings,high
+"*Write-ServiceEXE*",Suspicious Strings,high
+"*Write-CMDServiceBinary*",Suspicious Strings,high
+"*VirtualProtect*",Suspicious Win32 API call,high
+"*VirtualFree*",Suspicious Win32 API call,high
+"*VirtualAlloc*",Suspicious Win32 API call,high
+"*UnverifiableCodeAttribute*",Dynamic assembly building - method indirection,high
+"*UnderlyingSystemType*",Suspicious methods - properties on Type,high
+"*TypeInitializer*",Suspicious methods - properties on Type,high
+"*TypeHandle*",Suspicious methods - properties on Type,high
+"*TransformFinalBlock*",Crypto - Ransomware,high
+"*ToBase64String*",General Obfuscation,high
+"*TexttoEXE*",Suspicious Strings,high
+"*TOKEN_QUERY*",Offensive Powershell,high
+"*TOKEN_PRIVILEGES*",Offensive Powershell,high
+"*TOKEN_INFORMATION_CLASS*",Offensive Powershell,high
+"*TOKEN_IMPERSONATE*",Offensive Powershell,high
+"*TOKEN_ELEVATION*",Offensive Powershell,high
+"*TOKEN_DUPLICATE*",Offensive Powershell,high
+"*TOKEN_ASSIGN_PRIMARY*",Offensive Powershell,high
+"*TOKEN_ALL_ACCESS*",Offensive Powershell,high
+"*TOKEN_ADJUST_PRIVILEGES*",Offensive Powershell,high
+"*System.Security.Cryptography*",Offensive Powershell,high
+"*System.Runtime.InteropServices*",Offensive Powershell,high
+"*System.Reflection.AssemblyName*",Offensive Powershell,high
+"*StructureToPtr*",System.Runtime.InteropServices,high
+"*StringtoBase64*",Suspicious Strings,high
+"*Start-CaptureServer*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*Show-TargetScreen*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*SetThreadToken*",Suspicious Win32 API call,high
+"*SetInformationProcess*",Crypto - Ransomware,high
+"*Set-Wallpaper*",PowerShell Empire Commands,high
+"*Set-MasterBootRecord*",Suspicious Strings,high
+"*Set-MacAttribute*",PowerShell Empire Commands,high
+"*Set-ExecutionPolicy*",Suspicious Strings,low
+"*Set-ADObject*",PowerView Commands (Recon),high
+"*Security.Cryptography.CryptoStream*",Offensive Powershell,high
+"*ScriptBlockLogging*",Change Logging Setting,high
+"*SHA1Managed*",Crypto - Ransomware,high
+"*SE_PRIVILEGE_ENABLED*",Offensive Powershell,high
+"*SECURITY_DELEGATION*",Offensive Powershell,high
+"*Runtime.InteropServices*",Offensive Powershell,high
+"*Run-EXEonRemote*",Suspicious Strings,high
+"*RijndaelManaged*",Crypto - Ransomware,high
+"*RevertToSelf*",Suspicious Win32 API call,high
+"*Restore-ServiceEXE*",Suspicious Strings,high
+"*Remove-Update*",Suspicious Strings,high
+"*Remove-Update*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*Remove-PoshRat*",Suspicious Strings,high
+"*Remove-Persistence*",Suspicious Strings,high
+"*ReflectivePEInjection*",Suspicious Strings,high
+"*Reflection.Assembly*",Offensive Powershell,high
+"*ReflectedType*",Suspicious methods - properties on Type,high
+"*ReadProcessMemory*",Suspicious Win32 API call,high
+"*PtrToStructure*",System.Runtime.InteropServices,high
+"*PtrToString*",Suspicious Win32 API call,high
+"*ProtectedEventLogging*",Change Logging Setting,high
+"*PowerView*",PowerShell Empire Commands,high
+"*PowerUp*",PowerShell Empire Commands,high
+"*PowerBreach*",PowerShell Empire Commands,high
+"*Port-Scan*",Suspicious Strings,high
+"*PasswordDeriveBytes*",Crypto - Ransomware,high
+"*Parse_Keys*",Suspicious Strings,high
+"*PAGE_EXECUTE_READ*",Offensive Powershell,high
+"*Out-Minidump*",Suspicious Strings,high
+"*OpenWindowStation*",Suspicious Win32 API call,high
+"*OpenThreadToken*",Suspicious Win32 API call,high
+"*OpenProcessToken*",Suspicious Win32 API call,high
+"*OpenProcess*",Suspicious Win32 API call,high
+"*OpenDesktop*",Suspicious Win32 API call,high
+"*NonPublic*",Use of Internal Types,high
+"*New-HoneyHash*",PowerShell Empire Commands,high
+"*New-ElevatedPersistenceOption*",Suspicious Strings,high
+"*Net.Sockets.SocketFlags*",Offensive Powershell,high
+"*MiniDumpWriteDump*",Suspicious Win32 API call,high
+"*Mimikatz*",Suspicious Strings,high
+"*Microsoft.Win32.UnsafeNativeMethods*",Offensive Powershell,high
+"*Methods*",Dynamic assembly building - method indirection,high
+"*Metasploit*",Offensive Powershell,high
+"*MemoryStream*",General Obfuscation,high
+"*Marshal*",System.Runtime.InteropServices,high
+"*Management.Automation.RuntimeException*",Offensive Powershell,high
+"*MakePointerType*",Suspicious methods - properties on Type,high
+"*MakeGenericType*",Suspicious methods - properties on Type,high
+"*MakeByRefType*",Suspicious methods - properties on Type,high
+"*MakeArrayType*",Suspicious methods - properties on Type,high
+"*MailRaider*",PowerShell Empire Commands,high
+"*LogPipelineExecutionDetails*",Change Logging Setting,high
+"*LoadLibrary*",Suspicious Win32 API call,high
+"*LSA_UNICODE_STRING*",Offensive Powershell,high
+"*KerberosRequestorSecurityToken*",Offensive Powershell,high
+"*InvokeMember*",Suspicious methods - properties on Type,high
+"*Invoke-WinEnum*",PowerShell Empire Commands,high
+"*Invoke-WScriptBypassUAC*",PowerShell Empire Commands,high
+"*Invoke-VoiceTroll*",PowerShell Empire Commands,high
+"*Invoke-UserHunter*",PowerView Commands (Recon),high
+"*Invoke-TokenManipulation*",Suspicious Strings,high
+"*Invoke-ThunderStruck*",PowerShell Empire Commands,high
+"*Invoke-Tater*",PowerShell Empire Commands,high
+"*Invoke-Shellcode*",Suspicious Strings,high
+"*Invoke-ServiceUserAdd*",Suspicious Strings,high
+"*Invoke-ServiceStop*",Suspicious Strings,high
+"*Invoke-ServiceStart*",Suspicious Strings,high
+"*Invoke-ServiceEnable*",Suspicious Strings,high
+"*Invoke-ServiceDisable*",Suspicious Strings,high
+"*Invoke-ServiceCMD*",Suspicious Strings,high
+"*Invoke-ServiceAbuse*",PowerUp Commands (Priv Esc),high
+"*Invoke-SSHCommand*",PowerShell Empire Commands,high
+"*Invoke-SMBScanner*",PowerShell Empire Commands,high
+"*Invoke-RunAs*",PowerShell Empire Commands,high
+"*Invoke-ReverseDNSLookup*",PowerShell Empire Commands,high
+"*Invoke-ReflectivePEInjection*",PowerShell Empire Commands,high
+"*Invoke-PsUaCme*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*Invoke-PsGcatAgent*",Suspicious Strings,high
+"*Invoke-PsExec*",PowerShell Empire Commands,high
+"*Invoke-PowerShellWmi*",Suspicious Strings,high
+"*Invoke-PowerShellUdp*",Suspicious Strings,high
+"*Invoke-PowerShellTcp*",Suspicious Strings,high
+"*Invoke-PowerShellIcmp*",Suspicious Strings,high
+"*Invoke-PowerDump*",PowerShell Empire Commands,high
+"*Invoke-PostExfil*",PowerShell Empire Commands,high
+"*Invoke-PoshRatHttp*",Suspicious Strings,high
+"*Invoke-PortScan*",PowerShell Empire Commands,high
+"*Invoke-Paranoia*",PowerShell Empire Commands,high
+"*Invoke-PSInject*",Suspicious Strings,high
+"*Invoke-PSGcat*",Suspicious Strings,high
+"*Invoke-NinjaCopy*",Suspicious Strings,high
+"*Invoke-NetworkRelay*",Suspicious Strings,high
+"*Invoke-NetRipper*",PowerShell Empire Commands,high
+"*Invoke-Mimikatz*",PowerShell Empire Commands,high
+"*Invoke-MassTokens*",Suspicious Strings,high
+"*Invoke-MassTemplate*",Suspicious Strings,high
+"*Invoke-MassSearch*",Suspicious Strings,high
+"*Invoke-MassMimikatz*",Suspicious Strings,high
+"*Invoke-MassCommand*",Suspicious Strings,high
+"*Invoke-InveighRelay*",PowerShell Empire Commands,high
+"*Invoke-Inveigh*",PowerShell Empire Commands,high
+"*Invoke-FindPathHijack*",Suspicious Strings,high
+"*Invoke-FindDLLHijack*",Suspicious Strings,high
+"*Invoke-Encode*",Suspicious Strings,high
+"*Invoke-EgressCheck*",PowerShell Empire Commands,high
+"*Invoke-DowngradeAccount*",PowerView Commands (Recon),high
+"*Invoke-DllInjection*",PowerShell Empire Commands,high
+"*Invoke-DllEncode*",Suspicious Strings,high
+"*Invoke-Decode*",Suspicious Strings,high
+"*Invoke-DCSync*",PowerShell Empire Commands,high
+"*Invoke-CredentialsPhish*",Suspicious Strings,high
+"*Invoke-CredentialInjection*",Suspicious Strings,high
+"*Invoke-CreateCertificate*",Suspicious Strings,high
+"*Invoke-CallbackIEX*",Suspicious Strings,high
+"*Invoke-BypassUAC*",PowerShell Empire Commands,high
+"*Invoke-BruteForce*",Suspicious Strings,high
+"*Invoke-BackdoorLNK*",PowerShell Empire Commands,high
+"*Invoke-AllChecks*",Suspicious Strings,high
+"*Invoke-ARPScan*",PowerShell Empire Commands,high
+"*Invoke-ADSBackdoor*",Suspicious Strings,high
+"*Invoke-ACLScanner*",PowerView Commands (Recon),high
+"*Invoke--Shellcode*",Suspicious Strings,high
+"*InteropServices*",System.Runtime.InteropServices,high
+"*IntPtr*",System.Runtime.InteropServices,high
+"*Install-ServiceBinary*",PowerUp Commands (Priv Esc),high
+"*Install-SSP*",PowerShell Empire Commands,high
+"*ImpersonateLoggedOnUser*",Suspicious Win32 API call,high
+"*IMAGE_NT_OPTIONAL_HDR64_MAGIC*",Offensive Powershell,high
+"*ILGenerator*",Dynamic assembly building - method indirection,high
+"*HTTP-Login*",PowerShell Empire Commands,high
+"*HTTP-Backdoor*",Suspicious Strings,high
+"*Gupt-Backdoor*",Suspicious Strings,high
+"*GetTypes*",Dynamic assembly building - method indirection,high
+"*GetTokenInformation*",Suspicious Win32 API call,high
+"*GetProperty*",Suspicious methods - properties on Type,low
+"*GetProperties*",Suspicious methods - properties on Type,high
+"*GetProcessHandle*",Suspicious Win32 API call,high
+"*GetProcAddress*",Suspicious Win32 API call,high
+"*GetPowerShell*",General Obfuscation,high
+"*GetNestedType*",Suspicious methods - properties on Type,high
+"*GetModuleHandle*",Suspicious Win32 API call,high
+"*GetMethod*",Suspicious methods - properties on Type,high
+"*GetMember*",Suspicious methods - properties on Type,high
+"*GetLogonSessionData*",Suspicious Win32 API call,high
+"*GetKeyboardState*",Keylogging,high
+"*GetInterface*",Suspicious methods - properties on Type,high
+"*GetForegroundWindow*",Keylogging,high
+"*GetField*",Suspicious methods - properties on Type,high
+"*GetEvents*",Suspicious methods - properties on Type,high
+"*GetEvent*",Suspicious methods - properties on Type,high
+"*GetDelegateForFunctionPointer*",Suspicious Win32 API call,high
+"*GetDefaultMembers*",Suspicious methods - properties on Type,high
+"*GetConstructors*",Suspicious methods - properties on Type,high
+"*GetAsyncKeyState*",Keylogging,high
+"*GetAssemblies*",Dynamic assembly building - method indirection,high
+"*Get-Webconfig*",Suspicious Strings,high
+"*Get-VulnSchTask*",PowerUp Commands (Priv Esc),high
+"*Get-VulnAutoRun*",PowerUp Commands (Priv Esc),high
+"*Get-VaultCredential*",Suspicious Strings,high
+"*Get-Unconstrained*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*Get-UnattendedInstallFiles*",Suspicious Strings,high
+"*Get-TimedScreenshot*",Suspicious Strings,high
+"*Get-SystemDNSServer*",PowerShell Empire Commands,high
+"*Get-System*",PowerShell Empire Commands,high
+"*Get-SiteListPassword*",PowerShell Empire Commands,high
+"*Get-ServiceUnquoted*",Suspicious Strings,high
+"*Get-ServicePerms*",Suspicious Strings,high
+"*Get-ServicePermission*",PowerUp Commands (Priv Esc),high
+"*Get-ServiceFilePermission*",PowerUp Commands (Priv Esc),high
+"*Get-ServiceEXEPerms*",Suspicious Strings,high
+"*Get-SecurityPackages*",PowerShell Empire Commands,high
+"*Get-Screenshot*",PowerShell Empire Commands,high
+"*Get-SPN*",PowerShell Empire Commands,high
+"*Get-RickAstley*",PowerShell Empire Commands,high
+"*Get-RegAutoLogon*",Suspicious Strings,high
+"*Get-RegAlwaysInstallElevated*",Suspicious Strings,high
+"*Get-PassHashes*",Suspicious Strings,high
+"*Get-PSADForestKRBTGTInfo*",Suspicious Strings,high
+"*Get-PSADForestInfo*",Suspicious Strings,high
+"*Get-ObjectACL*",PowerView Commands (Recon),high
+"*Get-NetUser*",PowerView Commands (Recon),high
+"*Get-NetSession*",PowerView Commands (Recon),high
+"*Get-NetOU*",PowerView Commands (Recon),high
+"*Get-NetLocalGroup*",PowerView Commands (Recon),high
+"*Get-NetGroupMember*",PowerView Commands (Recon),high
+"*Get-NetGroup*",PowerView Commands (Recon),high
+"*Get-NetGPOGroup*",PowerView Commands (Recon),high
+"*Get-NetForestTrust*",PowerView Commands (Recon),high
+"*Get-NetForestDomain*",PowerView Commands (Recon),high
+"*Get-NetForest*",PowerView Commands (Recon),high
+"*Get-NetDomainTrust*",PowerView Commands (Recon),high
+"*Get-LsaSecret*",Suspicious Strings,high
+"*Get-Keystrokes*",PowerShell Empire Commands,high
+"*Get-KerberosPolicy*",Suspicious Strings,high
+"*Get-Information*",Suspicious Strings,high
+"*Get-IndexedItem*",PowerShell Empire Commands,high
+"*Get-GPPPassword*",Suspicious Strings,high
+"*Get-FoxDump*",PowerShell Empire Commands,high
+"*Get-ComputerDetails*",PowerShell Empire Commands,high
+"*Get-ClipboardContents*",PowerShell Empire Commands,high
+"*Get-ChromeDump*",PowerShell Empire Commands,high
+"*Get-ApplicationHost*",Suspicious Strings,high
+"*FromBase64String*",General Obfuscation,high
+"*FreeLibrary*",Suspicious Win32 API call,high
+"*FreeHGlobal*",Suspicious Win32 API call,high
+"*Find-TrustedDocuments*",PowerShell Empire Commands,high
+"*Find-PSServiceAccounts*",Suspicious Strings,high
+"*Find-GPOLocation*",PowerView Commands (Recon),high
+"*Find-Fruit*",PowerShell Empire Commands,high
+"*Find-AVSignature*",Suspicious Strings,high
+"*Exploit-Jboss*",PowerShell Empire Commands,high
+"*ExpandString*",General Obfuscation,high
+"*Execute-OnTime*",Suspicious Strings,high
+"*Execute-DNSTXT-Code*",Suspicious Strings,high
+"*Execute-Command-MSSQL*",Suspicious Strings,high
+"*EnumerateSecurityPackages*",Suspicious Win32 API call,high
+"*EncodedCommand*",General Obfuscation,high
+"*Enabled-DuplicateToken*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*Enable-DuplicateToken *",Suspicious Strings,high
+"*Emit*",Dynamic assembly building - method indirection,high
+"*DuplicateTokenEx*",Suspicious Win32 API call,high
+"*Download_Execute*",Suspicious Strings,high
+"*Do-Exfiltration*",Suspicious Strings,high
+"*DllInjection*",Suspicious Strings,high
+"*DllImport*",Calling Add-Type,high
+"*Discover-PSMSSQLServers*",Suspicious Strings,high
+"*Discover-PSMSExchangeServers*",Suspicious Strings,high
+"*Discover-PSInterestingServices*",Suspicious Strings,high
+"*DeviceIoControl*",Crypto - Ransomware,high
+"*DeflateStream*",General Obfuscation,high
+"*DefineType*",Dynamic assembly building - method indirection,high
+"*DefinePInvokeMethod*",Dynamic assembly building - method indirection,high
+"*DefineLiteral*",Dynamic assembly building - method indirection,high
+"*DefineField*",Dynamic assembly building - method indirection,high
+"*DefineEnum*",Dynamic assembly building - method indirection,high
+"*DefineDynamicModule*",Dynamic assembly building - method indirection,high
+"*DefineDynamicAssembly*",Dynamic assembly building - method indirection,high
+"*DefineConstructor*",Dynamic assembly building - method indirection,high
+"*DeclaringType*",Suspicious methods - properties on Type,high
+"*DeclaringMethod*",Suspicious methods - properties on Type,high
+"*DangerousGetHandle*",Suspicious Win32 API call,high
+"*DNS_TXT_Pwnage*",Suspicious Strings,high
+"*Cryptography*",Crypto - Ransomware,high
+"*CryptoStream*",Crypto - Ransomware,high
+"*CryptoServiceProvider*",Crypto - Ransomware,high
+"*CreateUserThread*",Suspicious Win32 API call,high
+"*CreateType*",Dynamic assembly building - method indirection,high
+"*CreateThread*",Suspicious Win32 API call,high
+"*CreateRemoteThread*",Suspicious Win32 API call,high
+"*CreateProcessWithToken*",Suspicious Win32 API call,high
+"*CreateEncryptor*",Crypto - Ransomware,high
+"*CreateDecryptor*",Crypto - Ransomware,high
+"*Create-MultipleSessions*",Suspicious Strings,high
+"*Copy-VSS*",Suspicious Strings,high
+"*CloseHandle*",Suspicious Win32 API call,high
+"*Check-VM*",Suspicious Strings,high
+"*Bypass*",General Obfuscation,low
+"*BindingFlags*",Use of Internal Types,high
+"*Base64ToString*",Suspicious Strings,high
+"*AmsiUtils*",Offensive Powershell,high
+"*AllocHGlobal*",System.Runtime.InteropServices,high
+"*Advapi32.dll*",Offensive Powershell,high
+"*AdjustTokenPrivileges*",Suspicious Win32 API call,high
+"*AddSecurityPackage*",Suspicious Win32 API call,high
+"*Add-Type*",Calling Add-Type,low
+"*Add-ScrnSaveBackdoor*",Suspicious Strings,high
+"*Add-RegBackdoor*",Nishang Commands (Recon-Cred Theft-Priv Esc-Persistence),high
+"*Add-Persistence*",Suspicious Strings,high
+"*Add-ObjectACL*",PowerView Commands (Recon),high
+"*Add-Exfiltration*",Suspicious Strings,high

@@ -1,0 +1,135 @@
+<form>
+  <label>Active Directory Attacks</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Pass The Hash</title>
+      <input type="dropdown" searchWhenChanged="true" token="pthresult">
+        <label>PTH Result Filter</label>
+        <choice value="EventCode=&quot;4624&quot;">Successful</choice>
+        <choice value="EventCode=&quot;4625&quot;">Failed</choice>
+        <choice value="(EventCode=&quot;4624&quot; OR EventCode=&quot;4625&quot;)">Both Success &amp; Failure</choice>
+        <default>(EventCode="4624" OR EventCode="4625")</default>
+        <initialValue>(EventCode="4624" OR EventCode="4625")</initialValue>
+      </input>
+      <input type="multiselect" token="domainstoexclude" searchWhenChanged="true">
+        <label>Exclude Domains</label>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <valuePrefix>TargetDomain!="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter> AND </delimiter>
+        <fieldForLabel>TargetDomain</fieldForLabel>
+        <fieldForValue>TargetDomain</fieldForValue>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode=4624 OR EventCode=4625) Logon_Type=3 Type=Information Authentication_Package=NTLM | eval TargetDomain=mvindex(Account_Domain,1) | stats count by TargetDomain</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" $pthresult$ Logon_Type=3 Type=Information Authentication_Package=NTLM Account_Name!="ANONYMOUS LOGON" | eval TargetDomain=mvindex(Account_Domain,1) | eval TargetAccount=mvindex(Account_Name,1) |search $domainstoexclude$| sort-_time | Table _time TargetDomain TargetAccount src_nt_host dest_nt_host EventCodeDescription</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">15</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Kerberos Silver Ticket Attack</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode="4624" OR EventCode="4634" OR EventCode="4672")| eval TargetDomain=mvindex(Account_Domain,1) | eval TargetAccount=mvindex(Account_Name,1) | search (EventCode="4624" AND Account_Domain="*.*") OR (EventCode=4634 OR EventCode=4672 AND (TargetDomain="" OR TargetDomain!="*"))| sort-_time | Table _time TargetDomain TargetAccount src_nt_host dest_nt_host EventCodeDescription</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">15</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Kerberos Golden Ticket Attack</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode="4672" OR EventCode="4634") (Account_Domain="" OR Account_Domain!="*")| eval result=if(like(Security_ID,"%".Account_Name."%"),"Contained","Not Contained") | search result="Not Contained" |Table _time host Security_ID Account_Domain Account_Name result</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">15</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode="4769" (Account_Domain!="*.*" AND Account_Name="*\\*") | Table _time host Account_Domain Account_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">15</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>AD Attacks Dashboard Explanation</title>
+      <html>
+			<p>NOTE: Detecting this class of attack is extremely difficult within environments, these queries may only detect these types of attacks performed with older versions of attack utilities such as Mimikatz prior to mid 2016. This dashboard will be updated in future versions as more research is performed</p>
+	
+            <b>Pass The Hash</b>
+            <p>Pass The Hash shows instances of potential pass the hash attacks in your environment. This panel requires configuration and needs to know what domains exist within your environment. To enter your domains, please click the 'Exclude Domains' box above the panel and select ALL domain names that appear (do not add local accounts such as NT AUTHORITY or local computer names). To permanently have these domains filter, please click edit in the top right, the pencil icons next to exclude domains and add your domains in by default. Please note that this query will not function (and may display hundreds of results) for Non-Domain joined systems.</p>
+            
+            <b>Kerberos Silver Ticket Attack</b>
+            <p>Kerberos Silver Ticket Attack shows instances of potential kerberos silver ticket attacks in your environment. This search query looks for the following event characteristics:</p>
+            <p>1) Account Logon where the domain field has a Fully Qualified Domain Name (FQDN) (it should be a short domain name).</p>
+            <p>2) Account Logoff or Admin Logon has a blank Account Domain (it should be a short domain name). Note: If the Domain Field ever displays the value "3 eo.oe – ANSSI E" or "eo.oe.kiwi :)" it is an indication Mimikatz has been used to steal a ticket. These are the default domain values hardcoded into Mimikatz.</p>
+            
+            <b>Kerberos Golden Ticket Attack</b>
+            <p>Kerberos Golden Ticket Attack shows instances of potential kerberos golden ticket attacks in your environment. These search queries look for the following event characteristics:</p>
+            <p>1) Kerberos service ticket request with a non Fully Qualified Domain Name (FQDN) and an incorrect Account Name format (missing Username@FQDN)</p>
+            <p>2) Logon privileges or account logoff with differing usernames in account name fields and a blank account domain.</p>
+            
+            <b>More Information</b>
+            <p>For more information on these attacks please see the whitepaper 'Red vs. Blue: Modern Active Directory Attacks, Detection, and Protection Whitepaper</p>
+            <a href="https://www.blackhat.com/docs/us-15/materials/us-15-Metcalf-Red-Vs-Blue-Modern-Active-Directory-Attacks-Detection-And-Protection-wp.pdf">BlackHat Whitepaper Here</a>
+            <p/>
+            <a href="https://www.youtube.com/watch?v=b6GUXerE9Ac">BlackHat Conference Talk Here</a>
+      </html>
+    </panel>
+  </row>
+</form>

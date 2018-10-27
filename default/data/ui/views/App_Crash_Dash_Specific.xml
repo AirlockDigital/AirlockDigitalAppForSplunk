@@ -1,0 +1,168 @@
+<form script="app_crash_specific_layout_width.js">
+  <label>The App Crash Dash - Get Specific!</label>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true" token="time">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="application" searchWhenChanged="true">
+      <label>Application Name Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <html>
+                <code>Current Computer Name Filter Token: $computernamefilter$</code>
+            </html>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Faulting Applications &amp; Modules (EventID 1000)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName=$computernamefilter$ (SourceName="Application Error" AND EventCode=1000) Faulting_application_path=$application$ | sort-_time| Top Limit=30 Faulting_application_path Faulting_module_name Faulting_module_path Exception_code</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="Faulting_application_path">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 30 Hosts (Click to Filter)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName=$computernamefilter$ (SourceName="Application Error" AND EventCode=1000) Faulting_application_path=$application$| Top Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="height">400</option>
+        <drilldown>
+          <set token="computernamefilter">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Windows Error Reports (Application Crashes &amp; Hangs) (EventID 1001 &amp; 1002)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName=$computernamefilter$ ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002)) P1=$application$ Event_Name="App*"|rename P1 AS "Crashed / Hung Process Name"| eval InitialMessage=split(Message,"These files may be available here:"), InitialMessage=mvindex(InitialMessage,1),InitialMessage=split(InitialMessage,"Analysis symbol"), Dump_File=mvindex(InitialMessage,0) 
+|fillnull value="N/A" P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 Dump_File
+| Top Limit=30 "Event_Name" "Crashed / Hung Process Name" P2 P3 P4 P5 P6 P7 P8 Dump_File</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 30 Hosts (Click to Filter)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName=$computernamefilter$ ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002)) P1=$application$ Event_Name="App*"|rename P1 AS "Crashed / Hung Process Name"| Top Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="height">400</option>
+        <drilldown>
+          <set token="computernamefilter">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>The App Crash Dash - Get Specific!</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard allows you to further investigate application crashes and the potential modules that are causing the crashes.</p>
+      </html>
+    </panel>
+  </row>
+</form>

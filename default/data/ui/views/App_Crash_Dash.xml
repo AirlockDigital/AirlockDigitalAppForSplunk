@@ -1,0 +1,416 @@
+<form script="app_crash_layout_width.js">
+  <label>The App Crash Dash</label>
+  <fieldset submitButton="false">
+    <input type="time" searchWhenChanged="true" token="time">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Internet Explorer Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*iexplore.exe") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="iexplore.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="trendInterval">-7d</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="*iexplore.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Outlook Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*OUTLOOK.EXE") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="outlook.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="trendInterval">-7d</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="*outlook.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Excel Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*EXCEL.EXE") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="excel.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="*excel.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Word Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*WORD.EXE") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="*word.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="*word.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Powerpoint Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*POWERPNT.EXE") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="powerpnt.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="*powerpnt.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Chrome Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*chrome.exe") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="chrome.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="trendInterval">-7d</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="*chrome.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Splunk Faults &amp; Crashes</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000 Faulting_application_path="*splunk*.exe") OR ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002) P1="splunk*.exe") | stats count as numberofevents</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">0</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="trendInterval">-7d</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application="splunk*.exe"]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Faulting Applications &amp; Modules (EventID 1000)</title>
+      <input type="dropdown" searchWhenChanged="true" token="tabletopraretoken1">
+        <label>Table / Top / Rare</label>
+        <choice value="Top Limit=30 Faulting_application_path &quot;Faulting_application_image (drilldown)&quot; Faulting_module_name">Top</choice>
+        <choice value="Rare Limit=30 Faulting_application_path &quot;Faulting_application_image (drilldown)&quot;  Faulting_module_name">Rare</choice>
+        <choice value="Table _time ComputerName Faulting_application_path &quot;Faulting_application_image (drilldown)&quot; Faulting_module_name">Table</choice>
+        <default>Top Limit=30 Faulting_application_path "Faulting_application_image (drilldown)" Faulting_module_name</default>
+        <initialValue>Top Limit=30 Faulting_application_path "Faulting_application_image (drilldown)" Faulting_module_name</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000) |rex field=Faulting_application_path ".*\\\\(?&lt;Faulting_application_image&gt;.*)$$"|rename Faulting_application_image as "Faulting_application_image (drilldown)"| sort-_time | $tabletopraretoken1$</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="Faulting_application_path">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+        <drilldown target="_blank">
+        <condition field="Faulting_application_path"></condition>
+        <condition field="Faulting_module_name"></condition>
+        <condition field="Faulting_application_image (drilldown)">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application=$click.value2$]]>
+          </link>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 30 Hosts with Faulting Applications &amp; Modules (drilldown)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" (SourceName="Application Error" AND EventCode=1000) | Top Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="height">400</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.computernamefilter=$click.value$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Windows Error Reports (Application Crashes &amp; Hangs) (EventID 1001 &amp; 1002)</title>
+      <input type="dropdown" searchWhenChanged="true" token="crashsev">
+        <label>Report Severity</label>
+        <choice value="NonCritical">Critical Only</choice>
+        <choice value="thiswillincludenoncriticalcrashesaswell">Include Non-Critical</choice>
+        <default>NonCritical</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>NonCritical</initialValue>
+      </input>
+      <input type="dropdown" searchWhenChanged="true" token="tabletopraretoken2">
+        <label>Table / Top / Rare</label>
+        <choice value="Top Limit=30 &quot;Event_Name&quot; &quot;Crashed / Hung Process Name (drilldown)&quot;">Top</choice>
+        <choice value="Rare Limit=30 &quot;Event_Name&quot; &quot;Crashed / Hung Process Name (drilldown)&quot;">Rare</choice>
+        <choice value="sort -_time| Table _time ComputerName &quot;Event_Name&quot; &quot;Crashed / Hung Process Name (drilldown)&quot;">Table</choice>
+        <default>Top Limit=30 "Event_Name" "Crashed / Hung Process Name (drilldown)"</default>
+        <initialValue>Top Limit=30 "Event_Name" "Crashed / Hung Process Name (drilldown)"</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002)) Message !="$crashsev$" Event_Name="App*"|rename P1 AS "Crashed / Hung Process Name (drilldown)"| $tabletopraretoken2$</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+        <drilldown target="_blank">
+        <condition field="Event_Name"></condition>
+        <condition field="ComputerName"></condition>
+        <condition field="count"></condition>
+        <condition field="percent"></condition>
+        <condition field="_time"></condition>
+        <condition field="Crashed / Hung Process Name (drilldown)">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.application=$click.value2$]]>
+          </link>
+        </condition>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 30 Hosts Generating Windows Error Reports (drilldown)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Application" ComputerName="$computernamefilter$" ((SourceName="Windows Error Reporting" AND EventCode=1001) OR (SourceName="Application Hang" AND EventCode=1002)) Message !="*NonCritical*" Event_Name="App*"|rename P1 AS "Crashed / Hung Process Name"| Top Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="height">400</option>
+        <drilldown target="_blank">
+          <link>
+            <![CDATA[/app/airlock_digital/App_Crash_Dash_Specific?form.time.earliest=$time.earliest$&form.time.latest=$time.latest$&form.computernamefilter=$click.value$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>The App Crash Dash Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>Are your applications in pain? End their suffering. This Dashboard displays application crashes across the environment, the time picker at the top of the dashboard selects the range of data being searched.</p>
+            <p>Application Crashes may be caused by exploit activity in your environment. The top row shows crash instances of common productivity applications that are typically used to open files from the internet. </p>
+      </html>
+    </panel>
+  </row>
+</form>

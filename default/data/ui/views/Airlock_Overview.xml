@@ -1,0 +1,255 @@
+<form script="airlock_overview_layout_width.js">
+  <label>Airlock Overview</label>
+  <fieldset submitButton="false">
+    <input type="time" token="Time" searchWhenChanged="true">
+      <label>Time Selector</label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="group" searchWhenChanged="true">
+      <label>Group Filter</label>
+      <choice value="*">All</choice>
+      <initialValue>*</initialValue>
+      <fieldForLabel>group</fieldForLabel>
+      <fieldForValue>group</fieldForValue>
+      <search>
+        <query>sourcetype=airlock event=FileActivityMessage| Top group</query>
+      </search>
+      <default>*</default>
+    </input>
+    <input type="dropdown" searchWhenChanged="true" token="blockedaudit">
+      <label>Execution Type Filter</label>
+      <choice value="*">All</choice>
+      <choice value="Blocked">Blocked</choice>
+      <choice value="Untrusted">Untrusted</choice>
+      <choice value="Trusted">Trusted</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Execution Types</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$"| Top execution_type</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.execution_filter=$click.value$&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Blocked / Allowed Files</title>
+      <single>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="Blocked Execution"| stats count as Total</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c","0xd93f3c"]</option>
+        <option name="underLabel">Blocked Executions (Total)</option>
+        <option name="useColors">1</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.execution_filter=Blocked&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </single>
+      <single>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="Blocked Execution"|dedup sha256| stats count as Total</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c","0xd93f3c"]</option>
+        <option name="underLabel">Blocked Executions (Deduplicated)</option>
+        <option name="useColors">1</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.execution_filter=Blocked&form.deduplicate=| dedup sha256 |&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </single>
+      <single>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" (execution_type="Untrusted Execution (Audit)" OR execution_type="Untrusted Execution [Audit]" OR execution_type="Untrusted Execution (OTP)" OR execution_type="Untrusted Execution [OTP]")| stats count as Total</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c","0xd93f3c"]</option>
+        <option name="underLabel">Untrusted Executions (Total)</option>
+        <option name="useColors">1</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.execution_filter=Untrusted&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </single>
+      <single>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" (execution_type="Untrusted Execution (Audit)" OR execution_type="Untrusted Execution [Audit]" OR execution_type="Untrusted Execution (OTP)" OR execution_type="Untrusted Execution [OTP]")|dedup sha256| stats count as Total</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c","0xd93f3c"]</option>
+        <option name="underLabel">Untrusted Executions (Deduplicated)</option>
+        <option name="useColors">1</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.execution_filter=Untrusted&form.deduplicate=| dedup sha256 |&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>New Files Seen</title>
+      <table>
+        <search>
+          <query>sourcetype=airlock event=ServerActivityMessage description="*added to repository"| replace "* added to repository" WITH "*" IN description| rename description as "File Name" | sort - _time | Table datetime "File Name"</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">8</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <link>/app/airlock_digital/search?q=search%20sourcetype%3D"airlock" filename="$click.value2$" | Table datetime username hostname path filename sha256 parentgroup group execution_type</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Users With Highest Events</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 username</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.username_filter=$click.value$&form.execution_filter=$blockedaudit$&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Computers With Highest Events</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 hostname</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.hostname_filter=$click.value$&form.execution_filter=$blockedaudit$&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Policies With Highest Events</title>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 group</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link>
+            <![CDATA[/app/airlock_digital/Activity_Viewer?form.sub_policy_filter=$click.value$&form.execution_filter=$blockedaudit$&form.time.earliest=$Time.earliest$&form.time.latest=$Time.latest$]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Server Activity History</title>
+      <input type="dropdown" token="task_filter" searchWhenChanged="true">
+        <label>Task Filter</label>
+        <choice value="*">All</choice>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <fieldForLabel>task</fieldForLabel>
+        <fieldForValue>task</fieldForValue>
+        <search>
+          <query>sourcetype=airlock event=ServerActivityMessage | Top task</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </input>
+      <table>
+        <search>
+          <query>sourcetype=airlock event=ServerActivityMessage task="$task_filter$"| sort - _time | Table datetime task user description</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">7</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

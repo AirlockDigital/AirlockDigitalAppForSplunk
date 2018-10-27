@@ -1,0 +1,193 @@
+<form script="kernel_driver_layout_width.js">
+  <label>Kernel Driver Signing Errors</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="topraretoken" searchWhenChanged="true">
+      <label>Top / Rare</label>
+      <choice value="Top">Top</choice>
+      <choice value="Rare">Rare</choice>
+      <default>Top</default>
+      <initialValue>Top</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Invalid Image / Page Hash of a Kernel Driver (Top/Rare 30 Driver Names)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" SourceName="Microsoft Windows security auditing." (EventCode=5038 OR EventCode=6281) | $topraretoken$ Limit=30 Message File_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Invalid Image / Page Hash of a Kernel Driver (Top/Rare 30 Hosts)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" SourceName="Microsoft Windows security auditing." (EventCode=5038 OR EventCode=6281) | $topraretoken$ Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Failed Kernel Driver Loading (Top/Rare 30 Driver Names)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-Kernel-PnP" EventCode=219 |rex field=Message "(?&lt;Driver&gt;.+?){" | $topraretoken$ Limit=30 Driver</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Failed Kernel Driver Loading (Top/Rare 30 Hosts)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-Kernel-PnP" EventCode=219 |rex field=Message "(?&lt;Driver&gt;.+?){" | $topraretoken$ Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <title>Kernel Mode Driver Validation (Code Integrity Check) (Top/Rare 30)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" SourceName="*CodeIntegrity*" (EventCode=3001 OR EventCode=3002 OR EventCode=3003 OR EventCode=3004 OR EventCode=3010 OR EventCode=3023) (Type=Warning OR Type=Error) | $topraretoken$ Limit=30 ComputerName Message</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Kernel Mode Driver Validation (Code Integrity Check) (Top/Rare 30 Hosts)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" SourceName="*CodeIntegrity*" (EventCode=3001 OR EventCode=3002 OR EventCode=3003 OR EventCode=3004 OR EventCode=3010 OR EventCode=3023) (Type=Warning OR Type=Error) | $topraretoken$ Limit=30 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Kernel Driver Signing Errors Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays instances of corrupt or modified kernel driver loads. These events make indicate malicious activity such as the installation of a malicious kernel driver. Corrupt kernel drivers could also indicate disk errors on the host system</p>
+            <p>For x64-based computers, all kernel-mode drivers must be digitally signed.</p>
+            <p>For x86-based or Itanium-based computers, the following kernel-mode drivers require a digital signature: bootvid.dll, ci.dll, clfs.sys, hal.dll, kdcom.dll, ksecdd.sys, ntoskrnl.exe, pshed.dll, spldr.sys, tpm.sys, and winload.exe.</p>
+            <p>Source: <a href="https://technet.microsoft.com/en-us/library/cc733976(v=ws.10).aspx">Kernel-mode Driver Validation</a></p>
+      </html>
+    </panel>
+  </row>
+</form>

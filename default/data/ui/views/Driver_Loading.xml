@@ -1,0 +1,211 @@
+<form>
+  <search id="driverloadsearch">
+    <query>index=wineventlog sourcetype=XmlWinEventLog:Microsoft-Windows-Sysmon/Operational EventCode=6 $computerfilter$ $useridfilter$ $signaturefilter$ $signaturestatusfilter$ $imageloadedfilter$|sort - UtcTime</query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <label>Driver Loading</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toprare" searchWhenChanged="true">
+      <label>Charts Top / Rare</label>
+      <choice value="Top">Top</choice>
+      <choice value="Rare">Rare</choice>
+      <initialValue>Rare</initialValue>
+      <default>Rare</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"| dedup index | stats count as numberofevents| rangemap field=numberofevents low=1-50 default=severe | replace 0 with "No SysMon Events in previous 15 minutes, Check SysMon Logger" | replace 1 with "SysMon Events Logging OK"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0xd93f3c","0x65a637"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <option name="height">50</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="text" token="computerfilter" searchWhenChanged="true">
+        <label>Computer Name Filter</label>
+        <default>*</default>
+        <prefix>Computer="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="useridfilter" searchWhenChanged="true">
+        <label>UserID Filter</label>
+        <default>*</default>
+        <prefix>UserID="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="imageloadedfilter" searchWhenChanged="true">
+        <label>Image Loaded Filter</label>
+        <default>*</default>
+        <prefix>ImageLoaded="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="signaturefilter" searchWhenChanged="true">
+        <label>Signature Filter</label>
+        <default>*</default>
+        <prefix>Signature="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="signaturestatusfilter" searchWhenChanged="true">
+        <label>Signature Status Filter</label>
+        <default>*</default>
+        <prefix>SignatureStatus="*</prefix>
+        <suffix>*"</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search base="driverloadsearch">
+          <query>Table UtcTime Computer UserID ImageLoaded Signed Signature SignatureStatus</query>
+        </search>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Signature</title>
+      <chart>
+        <search base="driverloadsearch">
+          <query>| $toprare$ Signature</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Signature Status</title>
+      <chart>
+        <search base="driverloadsearch">
+          <query>| $toprare$ SignatureStatus</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Image Loaded</title>
+      <chart>
+        <search base="driverloadsearch">
+          <query>| $toprare$ ImageLoaded</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Users</title>
+      <chart>
+        <search base="driverloadsearch">
+          <query>| $toprare$ UserID</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Computers</title>
+      <chart>
+        <search base="driverloadsearch">
+          <query>| $toprare$ Computer</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Rare Driver Loading (By Hash)</title>
+      <table>
+        <search>
+          <query>index=wineventlog sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=6 |rex field=Hashes "SHA1=(?&lt;SHA1&gt;[^,]+)"|rex field=Hashes "MD5=(?&lt;MD5&gt;[^,]+)"|rex field=Hashes "SHA256=(?&lt;SHA256&gt;[^,]+)"|rex field=Hashes "IMPHASH=(?&lt;IMPHASH&gt;[^,]+)"| Rare ImageLoaded MD5 SHA1 SHA256 IMPHASH</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Driver Loading Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays driver load events. To display data your SysMon configuration must be configured to log driver loads.</p>
+            <p>Use this dashboard to identify instances of unexpected drivers loading, or drivers that may have an unusual hash or invalid digital signature.</p>
+      </html>
+    </panel>
+  </row>
+</form>

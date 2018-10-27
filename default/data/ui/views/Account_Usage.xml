@@ -1,0 +1,204 @@
+<form>
+  <label>Account Usage</label>
+  <search id="credentialloginsearch">
+    <query>index=wineventlog source="WinEventLog:Security" EventCode=4648 SourceName="Microsoft Windows security auditing." Process_Name="$processnamefilter$" ComputerName="$computernamefilter$" | eval AccountCreds=mvindex(Account_Name,1) | eval AccountDomain=mvindex(Account_Domain,1)|eval "Account Credentials Used"=AccountDomain + "/" + AccountCreds| search "Account Credentials Used"="$usernamefilter$"</query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toptable" searchWhenChanged="true">
+      <label>Top vs Table</label>
+      <choice value="Table _time">Table</choice>
+      <choice value="Top">Top</choice>
+      <default>Table _time</default>
+      <initialValue>Table _time</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Successful and Failed Logins</title>
+      <input type="dropdown" token="actiontkn">
+        <label>Success / Failed Login</label>
+        <choice value="*">All</choice>
+        <choice value="failure">Failed Login</choice>
+        <choice value="success">Successful Login</choice>
+        <default>failure</default>
+        <initialValue>failure</initialValue>
+      </input>
+      <input type="dropdown" token="authtypetkn" searchWhenChanged="true">
+        <label>Authentication Type</label>
+        <choice value="*">All</choice>
+        <choice value="2">Interactive</choice>
+        <choice value="3">Network</choice>
+        <choice value="4">Batch</choice>
+        <choice value="5">Service</choice>
+        <choice value="7">Unlock</choice>
+        <choice value="8">Network Clear Text</choice>
+        <choice value="9">New Credentials</choice>
+        <choice value="10">Remote Interactive</choice>
+        <choice value="11">Cached Interactive</choice>
+        <default>*</default>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="accountnametkn" searchWhenChanged="true">
+        <label>Account Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="computernametkn" searchWhenChanged="true">
+        <label>Computer Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" (EventCode=4624 OR EventCode=4625) action="$actiontkn$" Logon_Type="$authtypetkn$" ComputerName=$computernametkn$|eval accname=mvindex(Account_Name,1) |eval accdomain=mvindex(Account_Domain,1)| eval Account=accdomain + "/" + accname | search Account=$accountnametkn$| Rename Actual_Type AS "Logon Type" | Rename Description AS "Logon Description" |
+        Rename signature AS Result |sort-_time| $toptable$ Source_Network_Address Account ComputerName "Logon Type" Authentication_Package Result</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Account Lockouts</title>
+      <input type="text" token="lockedoutonfilter" searchWhenChanged="true">
+        <label>Locked Out On Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <input type="text" token="accountlockedfilter" searchWhenChanged="true">
+        <label>Account Locked Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode=4740  SourceName="Microsoft Windows security auditing." Caller_Computer_Name="$lockedoutonfilter$"| rename Caller_Computer_Name AS "Locked Out On" | eval "Account Locked"=mvindex(Security_ID,1) | sort-_time |search "Account Locked"="$accountlockedfilter$"| $toptable$ "Locked Out On" EventCodeDescription "Account Locked"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Service Account Failed Logins (Interactive or Remote Authentication Types)</title>
+      <input type="text" token="serviceaccountnameprefix" searchWhenChanged="true">
+        <label>Service Account Name Prefix</label>
+        <default>s_</default>
+        <suffix>*</suffix>
+        <initialValue>s_</initialValue>
+        <prefix>*</prefix>
+      </input>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode=4625 action="failure" (Logon_Type=2 OR Logon_Type=10 OR Logon_Type=11)|eval accname=mvindex(Account_Name,1) |eval accdomain=mvindex(Account_Domain,1)| eval Account=accdomain + "/" + accname | search Account="$serviceaccountnameprefix$"| Rename Actual_Type AS "Logon Type" | Rename Description AS "Logon Description" | Rename signature AS Result |sort-_time| $toptable$ Source_Network_Address Account ComputerName "Logon Type" Authentication_Package Result</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 50 Processes Performing Explicit Credential Logins</title>
+      <input type="text" token="processnamefilter" searchWhenChanged="true">
+        <label>Process Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <chart>
+        <search base="credentialloginsearch">
+          <query>| Top Limit=50 Process_Name</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 50 Accounts Performing Explicit Credential Logins</title>
+      <input type="text" token="usernamefilter" searchWhenChanged="true">
+        <label>User Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <chart>
+        <search base="credentialloginsearch">
+          <query>|Top Limit=50 "Account Credentials Used"</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 50 Endpoints Generating Explicit Credential Logins</title>
+      <input type="text" token="computernamefilter" searchWhenChanged="true">
+        <label>Computer Name Filter</label>
+        <default>*</default>
+        <prefix>*</prefix>
+        <suffix>*</suffix>
+        <initialValue>*</initialValue>
+      </input>
+      <chart>
+        <search base="credentialloginsearch">
+          <query>|Top Limit=50 ComputerName</query>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Account Usage Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays login events from across your environment and is designed to facilitate the interrogation of these events.</p>
+            <b>Service Account Failed Logins - Configuration Required</b>
+            <p>It is important to detect when Service Account logins are attempted within your environment (particularly interactively or using remote desktop) as these are commonly used by attackers to gain and maintain access (especially as passwords are commonly infrequently reset). If your organisation has a defined naming convention for service accounts (for example the service account starts or ends with svc_) please enter these characters in the filter to display only the events for service accounts. Please edit the filter to make this entry permanent.</p>
+            <b>What Are Explicit Credential Logins?</b>
+            <p>Explicit Credential Logins are performed whenever a computer uses credentials as part of a 'process' on the system. The three explicit credential dashboards allow you to zero in on what processes are using certain credentials, including where from.</p>
+      </html>
+    </panel>
+  </row>
+</form>

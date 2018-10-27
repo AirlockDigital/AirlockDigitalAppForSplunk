@@ -1,0 +1,10 @@
+EventCode,Description
+1005,Scan Failed
+1006,Detected Malware
+1008,Action on Malware Failed
+1010,Failed to Remove Item From Quarantine
+2001,Failed to Update Signatures
+2003,Failed to Update Engine
+2004,Reverting to Last Known Good Set of Signatures
+3002,Real-Time Protection Failed
+5008,Unexpected Error

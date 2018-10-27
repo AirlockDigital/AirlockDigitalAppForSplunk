@@ -1,0 +1,105 @@
+<form>
+  <label>Windows Defender</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="tabletoprare" searchWhenChanged="true">
+      <label>Table / Top / Rare</label>
+      <choice value="Table _time">Table</choice>
+      <choice value="Top">Top</choice>
+      <choice value="Rare">Rare</choice>
+      <default>Table _time</default>
+      <initialValue>Table _time</initialValue>
+    </input>
+    <input type="dropdown" token="eventtype" searchWhenChanged="true">
+      <label>Event</label>
+      <choice value="EventCode=1005 OR EventCode=1006 OR EventCode=1008 OR EventCode=1010 OR EventCode=2001 OR EventCode=2003 OR EventCode=2004 OR EventCode=3002 OR EventCode=5008">All</choice>
+      <choice value="EventCode=1005">Scan Failed</choice>
+      <choice value="EventCode=1006">Detected Malware</choice>
+      <choice value="EventCode=1008">Action on Malware Failed</choice>
+      <choice value="EventCode=1010">Failed to Remove from Quarantine</choice>
+      <choice value="EventCode=2001">Failed to Update Signatures</choice>
+      <choice value="EventCode=2003">Failed to Update Engine</choice>
+      <choice value="EventCode=2004">Revert to Last Known Good Set of Signatures</choice>
+      <choice value="EventCode=3002">Real-Time Protection Failed</choice>
+      <choice value="EventCode=5008">Unexpected Error</choice>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <default>EventCode=1006</default>
+      <initialValue>EventCode=1006</initialValue>
+    </input>
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="messagefilter" searchWhenChanged="true">
+      <label>Message Filter</label>
+      <default>*</default>
+      <prefix>Message="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Computers Reporting Events</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" $eventtype$ $computernamefilter$ $messagefilter$| Top ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Critical Windows Defender Event Types</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" (EventCode=1005 OR EventCode=1006 OR EventCode=1008 OR EventCode=1010 OR EventCode=2001 OR EventCode=2003 OR EventCode=2004 OR EventCode=3002 OR EventCode=5008) $computernamefilter$ $messagefilter$| Top Description</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" $eventtype$ $computernamefilter$ $messagefilter$| $tabletoprare$ ComputerName Message</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Windows Defender Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays critical Windows Defender events from computers in your environment. By default this dashboard displays 'detected malware' occurances, the dropdown menu can be used to report on other critical event types.</p>
+      </html>
+    </panel>
+  </row>
+</form>

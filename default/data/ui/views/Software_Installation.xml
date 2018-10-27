@@ -1,0 +1,198 @@
+<form script="software_service_layout_width.js">
+  <label>Software &amp; Service Installation</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="commonrare" searchWhenChanged="true">
+      <label>Rare vs Top</label>
+      <choice value="Rare Limit=30">Rare</choice>
+      <choice value="Top Limit=30">Top</choice>
+      <default>Rare Limit=30</default>
+      <initialValue>Rare Limit=30</initialValue>
+    </input>
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="kerneldriverfilter" searchWhenChanged="true">
+      <label>Kernel Driver Name Filter</label>
+      <default>*</default>
+      <prefix>Message="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="servicenamefilter" searchWhenChanged="true">
+      <label>Service Name Filter</label>
+      <default>*</default>
+      <prefix>Service_Name="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Kernel Filter Driver Registrations (Rare/Top 30)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-FilterManager" EventCode=6 $kerneldriverfilter$ $computernamefilter$| $commonrare$ Message</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Kernel Filter Driver Registrations (ComputerName)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-FilterManager" EventCode=6 $kerneldriverfilter$ $computernamefilter$| $commonrare$ ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>New Services (Rare/Top 30)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-Service Control Manager" EventCode=7045 $servicenamefilter$ $computernamefilter$| $commonrare$ Service_Name Service_Start_Type Service_Type Service_File_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>New Services (ComputerName)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-Service Control Manager" EventCode=7045 $servicenamefilter$ $computernamefilter$| $commonrare$ ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <title>New Sheduled Task (Rare/Top 30)</title>
+      <table>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Security" EventCode=4698 $computernamefilter$| $commonrare$ ComputerName Security_ID Task_Name Task_Content vendor</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>New Scheduled Task (ComputerName)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Security" EventCode=4698 $computernamefilter$| $commonrare$ ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Windows Updates Installed (Top 30)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName=Microsoft-Windows-WindowsUpdateClient EventCode=19 $computernamefilter$| $commonrare$ package package_title</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Software &amp; Service Installation Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays kernel filter driver and service installation events. Unexpected Kernel Filter Drivers and Service Installations could present a security risk to the environment.</p>
+            <b>Note About Non-Persistent VDI Hosts</b>
+            <p>If your organisation has non-persistent hosts or VDI infrastructure you may notice that this dashboard will generate a lot of Kernel &amp; Service installation events. This is because each time the new system is created a windows event will typically be generated for the installation of core services and drivers. Consider filtering out VDI hosts in the dashboard query, looking only at the 'rare' events or simply filter the drivers that register reguarly.</p>
+      </html>
+    </panel>
+  </row>
+</form>

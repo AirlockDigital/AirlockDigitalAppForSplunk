@@ -1,0 +1,95 @@
+<form script="group_policy_layout_width.js">
+  <label>Group Policy Errors</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" searchWhenChanged="true" token="tabletopraretoken">
+      <label>Table / Top / Rare</label>
+      <choice value="Top">Top</choice>
+      <choice value="Rare">Rare</choice>
+      <choice value="Table _time">Table</choice>
+      <default>Top</default>
+      <initialValue>Top</initialValue>
+    </input>
+    <input type="text" token="messagefiltertoken" searchWhenChanged="true">
+      <label>Message Filter</label>
+      <default>*</default>
+      <prefix>Message="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>ComputerName Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-GroupPolicy" (EventCode=1125 OR EventCode=1127 OR EventCode=1129) $messagefiltertoken$ $computernamefilter$| sort-_time | $tabletopraretoken$ ComputerName Message</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" SourceName="Microsoft-Windows-GroupPolicy" (EventCode=1125 OR EventCode=1127 OR EventCode=1129) $messagefiltertoken$ $computernamefilter$ | $tabletopraretoken$ ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Group Policy Errors Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays instances of group policy processing failures in your environment. Group policy needs to be healthy to ensure security policies are effectively applied to systems. Failures should be investigated.</p>
+      </html>
+    </panel>
+  </row>
+</form>

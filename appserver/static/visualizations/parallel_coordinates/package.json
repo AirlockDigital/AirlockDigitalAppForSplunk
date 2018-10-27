@@ -1,0 +1,22 @@
+{
+  "name": "parallel_coordinates",
+  "version": "1.1.0",
+  "description": "Parallel Coordinates Visualization",
+  "main": "visualization.js",
+  "scripts": {
+    "build": "PROD=1 $SPLUNK_HOME/bin/splunk cmd node ./node_modules/webpack/bin/webpack.js",
+    "devbuild": "$SPLUNK_HOME/bin/splunk cmd node ./node_modules/webpack/bin/webpack.js --progress",
+    "watch": "$SPLUNK_HOME/bin/splunk cmd node ./node_modules/webpack/bin/webpack.js -d --watch --progress"
+  },
+  "author": "Splunk",
+  "license": "MIT",
+  "devDependencies": {
+    "imports-loader": "^0.6.5",
+    "webpack": "^1.12.6"
+  },
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "d3": "^3.5.12",
+    "underscore": "^1.8.3"
+  }
+}

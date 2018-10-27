@@ -1,0 +1,225 @@
+<form>
+  <label>Windows Firewall</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" searchWhenChanged="true" token="tabletoptoken">
+      <label>Table/Top/Rare</label>
+      <choice value="Table _time ComputerName Modifying_Application Modifying_Username Profiles Direction Protocol Application_Path Rule_Name Service_Name Action Active">Table</choice>
+      <choice value="Top Limit=100 Modifying_Application Modifying_Username Rule_Name Action">Top</choice>
+      <choice value="Rare Limit=100 Modifying_Application Modifying_Username Rule_Name Action">Rare</choice>
+      <default>Table _time ComputerName Modifying_Application Modifying_Username Profiles Direction Protocol Application_Path Rule_Name Service_Name Action Active</default>
+      <initialValue>Table _time ComputerName Modifying_Application Modifying_Username Profiles Direction Protocol Application_Path Rule_Name Service_Name Action Active</initialValue>
+    </input>
+    <input type="dropdown" token="actiontoken" searchWhenChanged="true">
+      <label>Action</label>
+      <choice value="(EventCode=2004 OR EventCode=2005 OR EventCode=2006 OR EventCode=2033)">All Actions</choice>
+      <choice value="(EventCode=2004)">Rule Additions</choice>
+      <choice value="(EventCode=2005)">Rule Modifications</choice>
+      <choice value="(EventCode=2006 OR EventCode=2033)">Rule Deletions</choice>
+      <default>(EventCode=2004 OR EventCode=2005 OR EventCode=2006 OR EventCode=2033)</default>
+      <initialValue>(EventCode=2004 OR EventCode=2005 OR EventCode=2006 OR EventCode=2033)</initialValue>
+    </input>
+    <input type="text" token="computernamefiltertoken" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="usernamefiltertoken" searchWhenChanged="true">
+      <label>User Name Filter</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" $actiontoken$ ComputerName="$computernamefiltertoken$" | lookup SIDLookup SID as Modifying_User OUTPUT Translated_SID| eval Modifying_Username=coalesce(Translated_SID,Modifying_User)|search Modifying_Username="$usernamefiltertoken$"|rex field=Message "(?&lt;Message&gt;.+?) the Windows Firewall" | replace "A rule has been added to" WITH "Rule Addition" IN Message| replace "A rule has been modified in" WITH "Rule Modified" IN Message| replace "A rule has been deleted in" WITH "Rule Deleted" IN Message|rename Message as Action|sort -_time| $tabletoptoken$</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">12</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Applications Specified In Firewall Rules (Top/Rare 50)</title>
+      <input type="dropdown" token="pietopraretoken" searchWhenChanged="true">
+        <label>Pie Charts Top/Rare</label>
+        <choice value="Top Limit=50">Top</choice>
+        <choice value="Rare Limit=50">Rare</choice>
+        <default>Top Limit=50</default>
+        <initialValue>Top Limit=50</initialValue>
+      </input>
+      <chart>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" $actiontoken$ ComputerName="$computernamefiltertoken$" | lookup SIDLookup SID as Modifying_User OUTPUT Translated_SID| eval Modifying_Username=coalesce(Translated_SID,Modifying_User)|search Modifying_Username="$usernamefiltertoken$"|rex field=Message "(?&lt;Message&gt;.+?) the Windows Firewall" | replace "A rule has been added to" WITH "Rule Addition" IN Message| replace "A rule has been modified in" WITH "Rule Modified" IN Message| replace "A rule has been deleted in" WITH "Rule Deleted" IN Message|rename Message as Action| $pietopraretoken$ Application_Path</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Applications Modifying Firewall Rules (Top/Rare 50)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" $actiontoken$ ComputerName="$computernamefiltertoken$" | lookup SIDLookup SID as Modifying_User OUTPUT Translated_SID| eval Modifying_Username=coalesce(Translated_SID,Modifying_User)|search Modifying_Username="$usernamefiltertoken$"|rex field=Message "(?&lt;Message&gt;.+?) the Windows Firewall" | replace "A rule has been added to" WITH "Rule Addition" IN Message| replace "A rule has been modified in" WITH "Rule Modified" IN Message| replace "A rule has been deleted in" WITH "Rule Deleted" IN Message|rename Message as Action| $pietopraretoken$ Modifying_Application</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Users Modifying Firewall Rules (Top/Rare 50)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" $actiontoken$ ComputerName="$computernamefiltertoken$" | lookup SIDLookup SID as Modifying_User OUTPUT Translated_SID| eval Modifying_Username=coalesce(Translated_SID,Modifying_User)|search Modifying_Username="$usernamefiltertoken$"|rex field=Message "(?&lt;Message&gt;.+?) the Windows Firewall" | replace "A rule has been added to" WITH "Rule Addition" IN Message| replace "A rule has been modified in" WITH "Rule Modified" IN Message| replace "A rule has been deleted in" WITH "Rule Deleted" IN Message|rename Message as Action| $pietopraretoken$ Modifying_Username</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Computers Firewall Rules Modified On (Top/Rare 50)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" $actiontoken$ ComputerName="$computernamefiltertoken$" | lookup SIDLookup SID as Modifying_User OUTPUT Translated_SID| eval Modifying_Username=coalesce(Translated_SID,Modifying_User)|search Modifying_Username="$usernamefiltertoken$"|rex field=Message "(?&lt;Message&gt;.+?) the Windows Firewall" | replace "A rule has been added to" WITH "Rule Addition" IN Message| replace "A rule has been modified in" WITH "Rule Modified" IN Message| replace "A rule has been deleted in" WITH "Rule Deleted" IN Message|rename Message as Action| $pietopraretoken$ ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Firewall Group Policy Loading Failures</title>
+      <table>
+        <search>
+          <query>index=wineventlog sourcetype="WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" EventCode=2009 | sort -_time | Table _time ComputerName Message</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Log Clearing Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This Dashboard displays events generated by windows firewall modifications within your environment.</p>
+            <b>Windows Firewall Dashboard - Configuration Required</b>
+            <p>This dashboard may require configuration in order to translate Security ID's (SID) to usernames depending on your Splunk configuration. If the dashboard is displaying a SID, you can manually look up the SID in Active Directory or configure a SID mapping as follows:</p>
+            <p>1) Export a SID mapping file from your domain environment using powershell using the steps in this article: <a href="http://blogs.technet.com/b/deploymentguys/archive/2009/12/14/creating-a-sid-mapping-file-with-windows-powershell.aspx">Create a SID Mapping File With Powershell.</a>
+            </p>
+            <p>2) Add the results of this export to the SIDLookup.csv file, located in $SPLUNK_HOME\etc\apps\airlock_digital\lookups. Please ensure to retain the correct format of the lookup table at this location when entering data.</p>
+            <b>Limitations</b>
+            <p>Unfortunately, Microsoft does not seem to log port numbers within Windows Event Logs for rule creations and modifications. Port Based Rules will display the protocol and have a blank application entry, rule names will display as normal.</p>
+            <b>Assumptions</b>
+            <p>Splunk must be configured to ingest Windows Firewall logs from endpoints within your environment to display results</p>
+      </html>
+    </panel>
+  </row>
+</form>

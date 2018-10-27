@@ -1,0 +1,40 @@
+<dashboard stylesheet="airlockbutton.css">
+  <label>Landing</label>
+  <row>
+    <panel>
+      <html>
+            <div style="margin: 0 auto; width: 656px; text-align: center;">
+                <img src="/static/app/airlock_digital/Airlock_logo.png"></img>
+                <h1><a href="https://www.airlockdigital.com">www.airlockdigital.com</a></h1>
+            </div>
+            <br></br>
+            <div style="margin: 0 auto; width: 1200px; text-align: center;">
+              <a href="Airlock_Overview" class="myButton">Airlock Whitelisting</a>
+            </div>
+            <br></br>            
+            <div style="margin: 0 auto; width: 1200px; text-align: center;">
+              <a href="Windows_Overview" class="myButton">Windows Security</a> &#160;&#160;&#160;<a href="Process_Creation_Overview" class="myButton">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;SysMon&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</a>
+            </div>
+            <br></br>
+            <br></br>
+            <br></br>
+            <div style="margin: 0 auto; width: 1000px; text-align: center;">
+            <p>This application is designed to provide Splunk integration for Airlock's enterprise Application Whitelisting solution; and</p>
+            <p>Provide easy to use dashboards that allow interrogation of common Windows Security and SysInternals SysMon events. These dashboards are focused primarily at enterprise security operations teams.</p>
+            <br></br>
+            <p>For Windows events to be displayed correctly you must have the <a href="https://splunkbase.splunk.com/app/742/">Splunk Add-on for Microsoft Windows</a> installed and parsing logs.</p>
+            <p>It is preferable that logs are collected from all endpoints including domain controllers to provide complete visibility and dashboard information.</p>
+            <p>For SysMon events to be displayed correctly you must have the <a href="https://splunkbase.splunk.com/app/1914/">Add-on for Microsoft SysMon</a> installed and parsing logs.</p>
+            <p>Note: SysMon logs must be stored in the wineventlog index </p>            
+            <p>Please see the readme for additional configuration information.</p>
+            <p>Airlock Digital develops industry leading application whitelisting software which makes easy, achievable and secure application whitelisting a reality.</p>
+            <p>If you already use an application whitelisting product, test its configuration with our free <a href="https://www.airlockdigital.com/application-whitelisting-auditor/">Application Whitelist Auditor</a> </p>
+            <p>For more information please see our website.</p>
+            <b>Created by <a href="https://www.airlockdigital.com">Airlock Digital</a></b>
+            <br></br>
+            <b>Version 2.2</b>
+            </div>
+      </html>
+    </panel>
+  </row>
+</dashboard>

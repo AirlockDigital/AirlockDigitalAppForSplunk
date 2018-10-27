@@ -1,0 +1,173 @@
+<form>
+  <label>Powershell Script Block Logs - Computer Inspector</label>
+  <search id="powershellcomputersearch">
+    <query>
+      index="wineventlog" source="WinEventLog:Microsoft-Windows-PowerShell/Operational" $computernamefilter$ (EventCode=4100 OR EventCode=4103 OR EventCode=4104)| search $powershellwarningevents$ $suspiciouscommands$ $deduplicate$ $stringseverity$ $suspectstringfilter$
+      |eval ScriptNameTemp=split(Message,"Script Name = "), ScriptNameTemp=mvindex(ScriptNameTemp,1), ScriptNameTemp=split(ScriptNameTemp,"Command Path ="), Script_Name1=mvindex(ScriptNameTemp,0), ScriptNameTemp2=split(Message,"ScriptBlock ID: "), ScriptNameTemp2=mvindex(ScriptNameTemp2,1), ScriptNameTemp2=split(ScriptNameTemp2,"Path: "), Script_Name2=mvindex(ScriptNameTemp2,1), Script_Name = coalesce(Script_Name1, Script_Name2)
+      | fillnull value=Unknown Script_Name
+      | search Script_Name=$scriptnamefilter|s$
+      | sort -_time
+    </query>
+    <earliest>$form.timetoken.earliest$</earliest>
+    <latest>$form.timetoken.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="text" token="computernamefilter" searchWhenChanged="true">
+      <label>Computer Name Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="suspectstringfilter" searchWhenChanged="true">
+      <label>Suspect String Filter</label>
+      <default>*</default>
+      <prefix>fillnull value=N/A Suspect_String | search Suspect_String="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="scriptnamefilter" searchWhenChanged="true">
+      <label>Script Name Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <suffix>*</suffix>
+    </input>
+    <input type="dropdown" token="suspiciouscommands" searchWhenChanged="true">
+      <label>Show Only Suspicious Cmd Line(s)</label>
+      <choice value="| lookup suspect_ps_strings Suspect_String AS Message OUTPUT Suspect_String_Category Suspect_String String_Severity">No</choice>
+      <choice value="| lookup suspect_ps_strings Suspect_String AS Message OUTPUT Suspect_String_Category Suspect_String String_Severity| search Suspect_String_Category=&quot;*&quot;">Yes</choice>
+      <default>| lookup suspect_ps_strings Suspect_String AS Message OUTPUT Suspect_String_Category Suspect_String String_Severity</default>
+      <initialValue>| lookup suspect_ps_strings Suspect_String AS Message OUTPUT Suspect_String_Category Suspect_String String_Severity</initialValue>
+    </input>
+    <input type="dropdown" token="powershellwarningevents" searchWhenChanged="true">
+      <label>Show Only Warning Level Events</label>
+      <choice value="Type=&quot;*&quot;">No</choice>
+      <choice value="Type=&quot;Warning&quot;">Yes</choice>
+      <default>Type="*"</default>
+      <initialValue>Type="*"</initialValue>
+    </input>
+    <input type="dropdown" token="deduplicate" searchWhenChanged="true">
+      <label>Deduplicate Suspicious Strings</label>
+      <choice value="|">No</choice>
+      <choice value="| dedup Suspect_String |">Yes</choice>
+      <default>|</default>
+      <initialValue>|</initialValue>
+    </input>
+    <input type="dropdown" token="stringseverity" searchWhenChanged="true">
+      <label>Show Only High Severity Strings</label>
+      <choice value="search|">No</choice>
+      <choice value="search String_Severity=&quot;high&quot;|">Yes</choice>
+      <initialValue>search|</initialValue>
+      <default>search|</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search base="powershellcomputersearch">
+          <query>
+| dedup ComputerName
+| fillnull value=Unknown ComputerName
+| Top ComputerName</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,70,100]</option>
+        <option name="underLabel">Computer Name(s)</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="powershellcomputersearch">
+          <query>
+| search String_Severity="low"
+| stats count
+| rangemap field=count</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeValues">[0,2,5,10]</option>
+        <option name="underLabel">Number of Low Severity Events on Host</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="powershellcomputersearch">
+          <query>
+| search String_Severity="high"
+| stats count
+| rangemap field=count</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeValues">[0,2,5,10]</option>
+        <option name="underLabel">Number of High Severity Events on Host</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search base="powershellcomputersearch">
+          <query>
+|Top Limit=1 Script_Name</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,70,100]</option>
+        <option name="underLabel">Possible Script Name Used</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="powershellcomputersearch">
+          <query>
+| rex field=Message mode=sed "s/\s{2,}//g"            
+| eval RunSpaceTemp=split(Message,"Runspace ID = "), RunSpaceTemp=mvindex(RunSpaceTemp,1), RunSpaceTemp=split(RunSpaceTemp,"Pipeline ID = "), Runspace_Id=mvindex(RunSpaceTemp,0)
+| fillnull value=Unknown Runspace_Id
+|Top Limit=1 Runspace_Id</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="height">50</option>
+        <option name="rangeColors">["0x65a637","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,70,100]</option>
+        <option name="underLabel">Possible Runspace ID (click to drilldown)</option>
+        <option name="useColors">1</option>
+        <drilldown target="_blank">
+          <condition>
+            <link>
+              <![CDATA[/app/airlock_digital/powershell_runspace_viewer?form.timetoken.earliest=$form.timetoken.earliest$&form.timetoken.latest=$form.timetoken.latest$&form.runspace=$click.value2$]]>
+            </link>
+          </condition>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search base="powershellcomputersearch">
+          <query>| table _time ComputerName Message Suspect_String_Category Suspect_String</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

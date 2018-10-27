@@ -1,0 +1,165 @@
+<form script="autodiscover.js">
+  <label>Privileged Account Usage</label>
+    <search id="privilegedloginsearch">
+    <query>index=wineventlog source="WinEventLog:Security" EventCode=4672 Security_ID!="NT AUTHORITY\\SYSTEM" Security_ID!="*\\*$$" Security_ID=[| gentimes start=-1 | eval search=replace("$securityidfilter$","\\\\","\\\\\\\\") | search] $destinationcomputernamefilter$ $accountdomainfilter$</query>
+    <earliest>$selection.earliest$</earliest>
+    <latest>$selection.latest$</latest>
+  </search>
+  <fieldset submitButton="false" autoRun="false">
+    <input type="time" searchWhenChanged="true" token="time">
+      <label></label>
+      <default>
+        <earliest>-15m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="toprare" searchWhenChanged="true">
+      <label>Top/Rare Usernames</label>
+      <choice value="Top Security_ID">Top</choice>
+      <choice value="Rare Security_ID">Rare</choice>
+      <default>Top Security_ID</default>
+      <initialValue>Top Security_ID</initialValue>
+    </input>
+    <input type="dropdown" token="accountdomainfilter" searchWhenChanged="true">
+      <label>Account Domain Filter</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <prefix>Account_Domain="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>Account_Domain</fieldForLabel>
+      <fieldForValue>Account_Domain</fieldForValue>
+      <search>
+        <query>index=wineventlog source="WinEventLog:Security" EventCode=4672 Security_ID!="NT AUTHORITY\\SYSTEM" Security_ID!="*\\*$$" | dedup Account_Domain| Top Limit=100 Account_Domain</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="text" token="securityidfilter" searchWhenChanged="true">
+      <label>Security ID Filter</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="destinationcomputernamefilter" searchWhenChanged="true">
+      <label>Destination Computer Name Filter</label>
+      <default>*</default>
+      <prefix>ComputerName="*</prefix>
+      <suffix>*"</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <search base ="privilegedloginsearch">
+          <query>|dedup Security_ID| stats count| rangemap field=count low=0-200 severe=201-5000000</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="height">50</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">Unique Accounts Granted Administrative Tokens - Total</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Privileged Account Logins Over Time By Domain</title>
+      <chart>
+        <title>Drag a selection over this graph to investigate results</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode=4672 Security_ID!="NT AUTHORITY\\SYSTEM" Security_ID!="*\\*$$" Security_ID=[| gentimes start=-1 | eval search=replace("$securityidfilter$","\\\\","\\\\\\\\") | search] $destinationcomputernamefilter$ $accountdomainfilter$|dedup ComputerName Security_ID| timechart count by Account_Domain</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <selection>
+          <set token="selection.earliest">$start$</set>
+          <set token="selection.latest">$end$</set>
+          <set token="start.count">$start.count$</set>
+          <set token="end.count">$end.count$</set>
+        </selection>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.masterLegend">null</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="height">250</option>
+      </chart>
+      <html>
+                <p>Token Values:</p>
+                <code>New Selected Time Range: $selection.earliest$ - $selection.latest$</code>
+                <br/>
+                <code>Count Value Range: $start.count$ - $end.count$</code>
+                <br>
+                <code>The Dashboard is currently Filtering on the Following User: $securityidfilter$ (clear it using the security ID filter above)</code>  
+                </br>
+            </html>
+      <chart>
+        <title>Usernames Performing Privileged Logins (Top/Rare)</title>
+        <search base ="privilegedloginsearch">
+          <query>| dedup ComputerName Security_ID| $toprare$</query>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.legend.masterLegend">null</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="height">750</option>
+        <drilldown>
+          <set token="securityidfilter">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Privileged Logins (Source Account -&gt; Target Host)</title>
+      <viz type="airlock_digital.parallel_coordinates">
+         <search base ="privilegedloginsearch">
+          <query>|dedup ComputerName Security_ID| stats count by Security_ID ComputerName | fields - count</query>
+        </search>
+        <option name="airlock_digital.parallel_coordinates.colorMode">categorical</option>
+        <option name="height">1200</option>
+      </viz>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Show Me the Privileged Accounts!</title>
+      <input type="time" token="timepriv" searchWhenChanged="true">
+        <label></label>
+        <default>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <table>
+        <title>Use this table to see which accounts have logged into a system and been granted administrative rights. Use the export button in the bottom right to export for auditing. Use the domain filter at the top of the page to set domain restrictions.</title>
+        <search>
+          <query>index=wineventlog source="WinEventLog:Security" EventCode=4672 Security_ID!="NT AUTHORITY\\SYSTEM" Security_ID!="*\\*$$" $destinationcomputernamefilter$ $accountdomainfilter$|dedup ComputerName Security_ID| Top Limit=10000 Security_ID</query>
+          <earliest>$timepriv.earliest$</earliest>
+          <latest>$timepriv.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Privileged Account Usage Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays information about accounts which have been granted an administrative token on a system within your environment. Use the graph in the top left to select specific timeframes you may want more detail on.</p>
+            <b>Ideas</b>
+            <p>This dashboard is great for identifying which accounts in your environment actually have administrative privileges on a particular system. If an account has administrative rights on a system and logs in, the system will generate an event log of 4672 indicating the login token for the user has been assigned special privileges (administrative). This dashboard will only show accounts where administrative privelege logins have occured. So if you are using the 'Show Me the Privileged Accounts! table above, ensure you set a large time frame in the time picker for a good sample.</p>
+      </html>
+    </panel>
+  </row>
+</form>

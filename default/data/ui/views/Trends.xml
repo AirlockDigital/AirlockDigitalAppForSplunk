@@ -1,0 +1,53 @@
+<form>
+  <label>Trends</label>
+  <fieldset submitButton="false"></fieldset>
+  <row>
+    <panel>
+      <title>Executions Over Time</title>
+      <input type="time" token="executions_time" searchWhenChanged="true">
+        <label>Timeframe</label>
+        <default>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <input type="dropdown" token="trusted_execution" searchWhenChanged="true">
+        <label>Include Trusted Executions?</label>
+        <choice value="Trusted Execution">No</choice>
+        <choice value="Ignore">Yes</choice>
+        <default>Trusted Execution</default>
+        <initialValue>Trusted Execution</initialValue>
+      </input>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=FileActivityMessage NOT execution_type="$trusted_execution$" | eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") | timechart span=15m count by execution_type</query>
+          <earliest>$executions_time.earliest$</earliest>
+          <latest>$executions_time.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>New Files Seen Over Time</title>
+      <input type="time" token="new_files_seen" searchWhenChanged="true">
+        <label>Timeframe</label>
+        <default>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <chart>
+        <search>
+          <query>sourcetype=airlock event=ServerActivityMessage description="*added to repository"| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") | timechart span=15m count | rename count as "New Files"</query>
+          <earliest>$new_files_seen.earliest$</earliest>
+          <latest>$new_files_seen.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+  </row>
+</form>

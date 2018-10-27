@@ -1,0 +1,162 @@
+<form>
+  <label>Service Failures or Crashes</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="servicefilter" searchWhenChanged="true">
+      <label>Service Filter</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
+    <input type="text" token="hostfilter" searchWhenChanged="true">
+      <label>Host Filter</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Unexpected Service Terminations (Top 60 Services)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" (EventCode=7022 OR EventCode=7023 OR EventCode=7024 OR EventCode=7026 OR EventCode=7031 OR EventCode=7032 OR EventCode=7034) Message="$servicefilter$" ComputerName="$hostfilter$" |rex field=Message "(?&lt;Service&gt;.+?) It has done this" |Top Limit=60 Service</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Other Service Errors (Top 60 Services)</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" (EventCode=7022 OR EventCode=7023 OR EventCode=7024 OR EventCode=7026 OR EventCode=7031 OR EventCode=7032 OR EventCode=7034) Message!="*It has done this*" Message="$servicefilter$" ComputerName="$hostfilter$"|rename Message AS "Other Service Failures" |Top Limit=60 "Other Service Failures"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="count">
+          <colorPalette type="list">[#65A637,#6DB7C6,#F7BC38,#F58F39,#D93F3C]</colorPalette>
+          <scale type="threshold">0,30,70,100</scale>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Unexpected Service Terminations (Top 60 Hosts)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" (EventCode=7022 OR EventCode=7023 OR EventCode=7024 OR EventCode=7026 OR EventCode=7031 OR EventCode=7032 OR EventCode=7034) Message="$servicefilter$" ComputerName="$hostfilter$"|rex field=Message "(?&lt;Service&gt;.+?) It has done this" |Top Limit=60 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Other Service Errors (Top 60 Hosts)</title>
+      <chart>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" (EventCode=7022 OR EventCode=7023 OR EventCode=7024 OR EventCode=7026 OR EventCode=7031 OR EventCode=7032 OR EventCode=7034) Message!="*It has done this*" Message="$servicefilter$" ComputerName="$hostfilter$"|rename Message AS "Other Service Failures" |Top Limit=60 ComputerName</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>BSOD Crashes</title>
+      <table>
+        <search>
+          <query>index=wineventlog source="WinEventLog:System" EventCode=1001 Type=Error | sort -_time| table _time ComputerName Message</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <title>Service Failures or Crashes Dashboard Explanation</title>
+      <html>
+            <b>Overview</b>
+            <p>This dashboard displays instances of Service Crashes and Failures within your organisation. Crashing services could be indicative of a faulty service or a service that may be targeted. This dashboard is useful for monitoring security critical services, such as endpoint protection software that may be required for security. It is also useful for identifying commonly failing software.</p>
+            <p>The dashboard also displays BSOD events across the environment, BSOD events are increasingly uncommon and should not occur. These events are typically indicitave of an exploit, faulty drivers or faulty hardware.</p>
+      </html>
+    </panel>
+  </row>
+</form>
