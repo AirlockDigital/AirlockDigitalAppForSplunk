@@ -16,7 +16,7 @@
       <fieldForLabel>group</fieldForLabel>
       <fieldForValue>group</fieldForValue>
       <search>
-        <query>sourcetype=airlock event=FileActivityMessage | Top group</query>
+        <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) | Top group</query>
         <earliest>0</earliest>
         <latest></latest>
       </search>
@@ -29,7 +29,7 @@
       <title>publisher Rules In Use</title>
       <table>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type="*Trusted publisher Execution*" group=$sub_policy_filter$| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - count | Top publisher group</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type="*Trusted publisher Execution*" group=$sub_policy_filter$| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - count | Top publisher group</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -49,7 +49,7 @@
       <title>Path Rules In Use</title>
       <table>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type="*Trusted Path Execution*" group=$sub_policy_filter$| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - count | Top path group</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type="*Trusted Path Execution*" group=$sub_policy_filter$| eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - count | Top path group</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

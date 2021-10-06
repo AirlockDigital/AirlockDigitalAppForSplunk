@@ -16,7 +16,7 @@
       <fieldForLabel>parentgroup</fieldForLabel>
       <fieldForValue>parentgroup</fieldForValue>
       <search>
-        <query>sourcetype=airlock event=FileActivityMessage |Top parentgroup</query>
+        <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) |Top parentgroup</query>
       </search>
       <prefix>"</prefix>
       <suffix>"</suffix>
@@ -29,7 +29,7 @@
       <fieldForLabel>group</fieldForLabel>
       <fieldForValue>group</fieldForValue>
       <search>
-        <query>sourcetype=airlock event=FileActivityMessage parentgroup=$parent_policy$| Top group</query>
+        <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) parentgroup=$parent_policy$| Top group</query>
         <earliest>0</earliest>
         <latest></latest>
       </search>
@@ -90,7 +90,7 @@
       </input>
       <table>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval sha256=substr(sha256,1,7) | eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Table datetime hostname username path filename publisher parentprocess execution_type parentgroup group sha256 </query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval sha256=substr(sha256,1,7) | eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Table datetime hostname username path filename publisher parentprocess execution_type parentgroup group sha256 </query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -109,7 +109,7 @@
     <panel>
       <single>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | stats count as Total</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | stats count as Total</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -130,7 +130,7 @@
       <title>Top 10 Hostnames</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 hostname</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 hostname</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -164,7 +164,7 @@
       <title>Top 10 Usernames</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 username</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 username</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -198,7 +198,7 @@
       <title>Top 10 Folders</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 path</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 path</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -232,7 +232,7 @@
       <title>Top 10 Publishers</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 publisher</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 publisher</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -266,7 +266,7 @@
       <title>Top 10 Parent Processes</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 parentprocess</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) execution_type=$execution_filter$ hostname=$hostname_filter$ path=$path_filter$ parentgroup=$parent_policy$ group=$sub_policy_filter$ username=$username_filter$ publisher=$publisherflt$ parentprocess=$parentprocessfilt$ $deduplicate$ eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p")| sort - _time | Top Limit=10 parentprocess</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

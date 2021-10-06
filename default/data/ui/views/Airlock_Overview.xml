@@ -15,7 +15,7 @@
       <fieldForLabel>group</fieldForLabel>
       <fieldForValue>group</fieldForValue>
       <search>
-        <query>sourcetype=airlock event=FileActivityMessage| Top group</query>
+        <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json)| Top group</query>
       </search>
       <default>*</default>
     </input>
@@ -34,7 +34,7 @@
       <title>Execution Types</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$"| Top execution_type</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$"| Top execution_type</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -73,7 +73,7 @@
       <title>Blocked / Allowed Files</title>
       <single>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="Blocked Execution"| stats count as Total</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" execution_type="Blocked Execution"| stats count as Total</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -91,7 +91,7 @@
       </single>
       <single>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="Blocked Execution"|dedup sha256| stats count as Total</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" execution_type="Blocked Execution"|dedup sha256| stats count as Total</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -109,7 +109,7 @@
       </single>
       <single>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" (execution_type="Untrusted Execution (Audit)" OR execution_type="Untrusted Execution [Audit]" OR execution_type="Untrusted Execution (OTP)" OR execution_type="Untrusted Execution [OTP]")| stats count as Total</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" (execution_type="Untrusted Execution (Audit)" OR execution_type="Untrusted Execution [Audit]" OR execution_type="Untrusted Execution (OTP)" OR execution_type="Untrusted Execution [OTP]")| stats count as Total</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -127,7 +127,7 @@
       </single>
       <single>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" (execution_type="Untrusted Execution (Audit)" OR execution_type="Untrusted Execution [Audit]" OR execution_type="Untrusted Execution (OTP)" OR execution_type="Untrusted Execution [OTP]")|dedup sha256| stats count as Total</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" (execution_type="Untrusted Execution (Audit)" OR execution_type="Untrusted Execution [Audit]" OR execution_type="Untrusted Execution (OTP)" OR execution_type="Untrusted Execution [OTP]")|dedup sha256| stats count as Total</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -148,7 +148,7 @@
       <title>New Files Seen</title>
       <table>
         <search>
-          <query>sourcetype=airlock event=ServerActivityMessage description="*added to repository"| replace "* added to repository" WITH "*" IN description| rename description as "File Name" | sort - _time | Table datetime "File Name"</query>
+          <query>(sourcetype=airlock event=ServerActivityMessage) OR (source=Airlock_REST_svractivities sourcetype=_json) description="*added to repository"| replace "* added to repository" WITH "*" IN description| rename description as "File Name" | sort - _time | Table datetime "File Name"</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -171,7 +171,7 @@
       <title>Users With Highest Events</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 username</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 username</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -188,7 +188,7 @@
       <title>Computers With Highest Events</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 hostname</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 hostname</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -205,7 +205,7 @@
       <title>Policies With Highest Events</title>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 group</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) group="$group$" execution_type="*$blockedaudit$*"| Top Limit=200 group</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -230,14 +230,14 @@
         <fieldForLabel>task</fieldForLabel>
         <fieldForValue>task</fieldForValue>
         <search>
-          <query>sourcetype=airlock event=ServerActivityMessage | Top task</query>
+          <query>(sourcetype=airlock event=ServerActivityMessage) OR (source=Airlock_REST_svractivities sourcetype=_json) | Top task</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
       </input>
       <table>
         <search>
-          <query>sourcetype=airlock event=ServerActivityMessage task="$task_filter$"| sort - _time | Table datetime task user description</query>
+          <query>(sourcetype=airlock event=ServerActivityMessage) OR (source=Airlock_REST_svractivities sourcetype=_json) task="$task_filter$"| sort - _time | Table datetime task user description</query>
           <earliest>$Time.earliest$</earliest>
           <latest>$Time.latest$</latest>
           <sampleRatio>1</sampleRatio>

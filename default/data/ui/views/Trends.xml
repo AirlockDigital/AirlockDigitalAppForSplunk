@@ -20,7 +20,7 @@
       </input>
       <chart>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage NOT execution_type="$trusted_execution$" | eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") | timechart span=15m count by execution_type</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) NOT execution_type="$trusted_execution$" | eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") | timechart span=15m count by execution_type</query>
           <earliest>$executions_time.earliest$</earliest>
           <latest>$executions_time.latest$</latest>
         </search>

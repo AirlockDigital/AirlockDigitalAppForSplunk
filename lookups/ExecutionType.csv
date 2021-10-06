@@ -1,0 +1,10 @@
+type,execution_type
+0,Trusted Execution
+1,Blocked Execution
+2,Untrusted Execution [Audit]
+3,Untrusted Execution [OTP]
+4,Trusted Path Execution
+5,Trusted Publisher Execution
+6,Blocklist Execution
+7,Blocklist Execution [Audit]
+8,Trusted Process Execution

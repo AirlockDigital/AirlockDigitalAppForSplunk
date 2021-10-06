@@ -64,7 +64,7 @@
       </input>
       <table>
         <search>
-          <query>sourcetype=airlock event=FileActivityMessage hostname=$hostname_filter$ path=$path_filter$ filename=$file_name_filter$ parentprocess=$parent_process_filter$ commandline=$command_line_filter$ $blankcmdline$|eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") $uniqcmdline$ sort - _time | Table datetime hostname username parentprocess path filename commandline</query>
+          <query>(sourcetype=airlock event=FileActivityMessage) OR (source=Airlock_REST_exechistories sourcetype=_json) hostname=$hostname_filter$ path=$path_filter$ filename=$file_name_filter$ parentprocess=$parent_process_filter$ commandline=$command_line_filter$ $blankcmdline$|eval _time=strptime(datetime,"%d/%m/%Y %I:%M:%S %p") $uniqcmdline$ sort - _time | Table datetime hostname username parentprocess path filename commandline</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

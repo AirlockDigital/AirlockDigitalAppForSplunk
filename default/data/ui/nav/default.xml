@@ -1,7 +1,7 @@
 <nav color="#104284">
-	<view name="Landing" default='true' />
-	<collection label="Airlock Application Whitelisting">
-		<view name="Airlock_Overview" />	
+	<view name="Landing"/>
+	<collection label="Airlock Application Allowlisting">
+		<view name="Airlock_Overview" default='true' />	
 		<view name="Activity_Viewer" />
 		<view name="Command_Line" />
 		<view name="Rule_Usage" />
